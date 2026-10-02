@@ -1,10 +1,11 @@
-const CACHE='fundraising-eraffle-v4';
+const CACHE='fundraising-eraffle-v5';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
-html.force-phone .app{width:100%!important;max-width:none!important;margin:0!important;min-height:100vh!important}
-html.force-phone header{width:100%!important}
+html.force-phone body{height:var(--approved-mobile-height,100svh)!important;min-height:var(--approved-mobile-height,100svh)!important;max-height:var(--approved-mobile-height,100svh)!important;overflow:hidden!important}
+html.force-phone .app{width:100%!important;max-width:none!important;margin:0!important;height:var(--approved-mobile-height,100svh)!important;min-height:var(--approved-mobile-height,100svh)!important;max-height:var(--approved-mobile-height,100svh)!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;display:flex!important;flex-direction:column!important}
+html.force-phone header{width:100%!important;flex:0 0 auto!important}
 html.force-phone .top{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:10px!important;padding:14px 14px 10px!important}
 html.force-phone .brand{display:flex!important;align-items:center!important;gap:10px!important;flex:1 1 210px!important;min-width:0!important}
 html.force-phone .logo{width:46px!important;height:46px!important;min-width:46px!important;border-radius:14px!important;font-size:16px!important}
@@ -14,7 +15,7 @@ html.force-phone .top-actions{display:flex!important;width:100%!important;justif
 html.force-phone .top-actions .btn{padding:10px 13px!important;font-size:13px!important;border-radius:12px!important}
 html.force-phone .nav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;padding:0 14px 14px!important}
 html.force-phone .nav button{width:100%!important;padding:10px 9px!important;font-size:13px!important;border-radius:999px!important;text-align:center!important}
-html.force-phone main{padding:14px!important;width:100%!important}
+html.force-phone main{padding:14px!important;width:100%!important;flex:0 0 auto!important}
 html.force-phone .hero{padding:24px 20px!important;min-height:0!important;border-radius:22px!important}
 html.force-phone .eyebrow{font-size:10px!important;letter-spacing:.13em!important}
 html.force-phone .hero h2{font-size:32px!important;line-height:1.05!important;margin:8px 0 10px!important}
@@ -36,7 +37,7 @@ html.force-phone .section-title{align-items:flex-start!important;flex-direction:
 html.force-phone .searchline{flex-direction:column!important}
 html.force-phone input,html.force-phone select,html.force-phone textarea{font-size:16px!important;padding:12px!important}
 html.force-phone table{min-width:680px!important}
-html.force-phone .footer{font-size:11px!important;padding:20px 14px 28px!important}
+html.force-phone .footer{font-size:11px!important;padding:20px 14px 28px!important;flex:0 0 auto!important}
 @media(min-width:560px){html.force-phone .nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}html.force-phone .stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}html.force-phone .two{grid-template-columns:1fr 1fr!important}}
 `;
 
@@ -48,22 +49,30 @@ const PHONE_JS=`
   var isPhone=/Android|iPhone|iPod|Mobile|Opera Mini|IEMobile/i.test(ua)||touchMobile;
   if(!isPhone)return;
   document.documentElement.classList.add('force-phone');
-  function fixDesktopViewport(){
+  function applyApprovedMobileFrame(){
     var sw=Math.min(screen.width||0,screen.height||0);
     var vw=window.innerWidth||document.documentElement.clientWidth||0;
+    var scale=1;
     if(sw>0&&vw>sw*1.35){
-      var scale=vw/sw;
+      scale=vw/sw;
       document.documentElement.style.overflowX='hidden';
       document.body.style.width=sw+'px';
       document.body.style.maxWidth=sw+'px';
       document.body.style.margin='0';
       document.body.style.zoom=String(scale);
     }else{
-      document.body.style.width='';document.body.style.maxWidth='';document.body.style.zoom='';
+      document.body.style.width='';
+      document.body.style.maxWidth='';
+      document.body.style.zoom='';
+    }
+    var rawHeight=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||document.documentElement.clientHeight||0;
+    if(rawHeight>0){
+      var lockedHeight=Math.max(320,Math.round(rawHeight/scale));
+      document.documentElement.style.setProperty('--approved-mobile-height',lockedHeight+'px');
     }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fixDesktopViewport,{once:true});else fixDesktopViewport();
-  window.addEventListener('orientationchange',function(){setTimeout(fixDesktopViewport,250)});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyApprovedMobileFrame,{once:true});else applyApprovedMobileFrame();
+  window.addEventListener('orientationchange',function(){setTimeout(applyApprovedMobileFrame,300)});
 })();
 `;
 
