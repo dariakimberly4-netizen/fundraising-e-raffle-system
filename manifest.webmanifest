@@ -1,0 +1,9 @@
+{
+  "name": "Fundraising E-Raffle System",
+  "short_name": "E-Raffle",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f4fa",
+  "theme_color": "#4b1f70",
+  "icons": []
+}
