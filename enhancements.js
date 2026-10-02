@@ -1,10 +1,37 @@
 (function(){
   const REQUEST_PREFIX='ERREQ1.';
   const QR_LIB='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  const CAMPAIGN={
+    title:'GET TOGETHER 2027 — Fundraising E‑Raffle',
+    org:"Parkinson's Disease Warriors Philippines",
+    drawDate:'2027-01-16',
+    purpose:"Fundraising in support of GET TOGETHER 2027 — New Hope: Moving Forward Beyond Parkinson’s."
+  };
 
   function toastSafe(msg){
     try{ if(typeof toast==='function') toast(msg); else alert(msg); }catch(e){ alert(msg); }
   }
+
+  function applyCampaignBranding(){
+    try{
+      document.title='GET TOGETHER 2027 — Fundraising E‑Raffle';
+      if(typeof db!=='undefined' && db && db.settings){
+        db.settings.title=CAMPAIGN.title;
+        db.settings.org=CAMPAIGN.org;
+        db.settings.drawDate=CAMPAIGN.drawDate;
+        db.settings.purpose=CAMPAIGN.purpose;
+        localStorage.setItem('fundraising_eraffle_v1',JSON.stringify(db));
+      }
+      if(typeof ticketNo==='function'){
+        ticketNo=function(n){return `GT27-${String(n).padStart(5,'0')}`};
+      }
+      const footer=document.querySelector('.footer');
+      if(footer) footer.textContent='GET TOGETHER 2027 • Fundraising E‑Raffle System';
+      if(typeof loadSettings==='function') loadSettings();
+      if(typeof renderAll==='function') renderAll();
+    }catch(e){}
+  }
+
   function b64urlDecode(s){
     try{
       s=s.replace(/-/g,'+').replace(/_/g,'/');
@@ -34,7 +61,7 @@
     box.style.marginBottom='14px';
     box.innerHTML=`
       <h3 style="margin:0 0 6px">Buyer Request</h3>
-      <p class="note" style="margin:0 0 12px">Supporters can prepare their details on the public buyer page. Paste the request code here to prefill the sale form.</p>
+      <p class="note" style="margin:0 0 12px">Supporters can prepare their GET TOGETHER 2027 raffle request on the public buyer page. Paste the request code here to prefill the sale form.</p>
       <div class="searchline">
         <input id="buyerRequestCode" placeholder="Paste ERREQ1 request code">
         <button class="btn primary" type="button" id="importBuyerRequestBtn">Import Request</button>
@@ -50,7 +77,7 @@
         const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??''};
         set('buyerName',d.buyerName);set('buyerContact',d.contact);set('buyerEmail',d.email);set('qty',d.qty);
         set('paymentStatus','pending');set('paymentMethod',d.method||'Other');set('paymentRef',d.ref||'');
-        set('notes',[d.notes,'Imported from public buyer request '+(d.requestId||'')].filter(Boolean).join(' • '));
+        set('notes',[d.notes,'Imported from GET TOGETHER 2027 public buyer request '+(d.requestId||'')].filter(Boolean).join(' • '));
         if(typeof calcSale==='function') calcSale();
         toastSafe('Buyer request imported. Review payment, then create the sale.');
         document.getElementById('buyerName')?.scrollIntoView({behavior:'smooth',block:'center'});
@@ -128,6 +155,6 @@
     setTimeout(()=>{try{if(typeof verifyTicket==='function')verifyTicket();}catch(e){}},100);
   }
 
-  function init(){addBuyerImport();wrapTicketFunctions();handleVerifyQuery();}
+  function init(){applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
