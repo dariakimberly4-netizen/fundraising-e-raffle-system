@@ -5,7 +5,7 @@
   const SEEN_KEY='gt27_buyer_completion_seen_v1';
   const FEATURES={tickets:'buyer-etickets-v1',paymentdetails:'buyer-payment-details-v1',contact:'buyer-contact-v1',rules:'buyer-rules-v1'};
   const $=id=>document.getElementById(id);
-  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
   const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:2});
 
   function style(){
@@ -46,6 +46,20 @@
   function loadOrder(){try{return JSON.parse(localStorage.getItem(ORDER_KEY))}catch(e){return null}}
   function loadTickets(){try{return JSON.parse(localStorage.getItem(TICKET_KEY)||'null')}catch(e){return null}}
   function saveTickets(x){localStorage.setItem(TICKET_KEY,JSON.stringify(x))}
+  function syncVerifyStore(pack){
+    try{
+      const KEY='fundraising_eraffle_v1';
+      let db=JSON.parse(localStorage.getItem(KEY)||'null')||{settings:{title:'GET TOGETHER 2027',org:"Parkinson's Disease Warriors Philippines",price:100,target:500,drawDate:'2027-01-16',permit:'',purpose:'Fundraising in support of GET TOGETHER 2027'},sales:[],tickets:[],winners:[],nextTicket:1};
+      if(!Array.isArray(db.tickets))db.tickets=[];
+      pack.tickets.forEach(t=>{
+        const existing=db.tickets.find(x=>x.number===t.number||x.code===t.code);
+        const item={id:'buyer-'+(t.number||t.code),saleId:pack.saleId||'buyer-release',number:t.number,code:t.code,buyerName:t.buyerName||pack.buyerName||'',contact:'',email:'',price:Number(t.price||0),status:'paid',createdAt:pack.issuedAt||new Date().toISOString(),voided:false};
+        if(existing)Object.assign(existing,item);else db.tickets.push(item);
+      });
+      db.settings=db.settings||{};db.settings.title='GET TOGETHER 2027';db.settings.org="Parkinson's Disease Warriors Philippines";db.settings.drawDate='2027-01-16';
+      localStorage.setItem(KEY,JSON.stringify(db));
+    }catch(e){}
+  }
 
   function renderPaymentStatus(){
     const box=$('buyerPaymentStatus');if(!box)return;const o=loadOrder();const pack=loadTickets();
@@ -66,7 +80,7 @@
   function saveTicket(no){const t=findTicket(no);if(!t)return;const html=`<!doctype html><meta charset="utf-8"><title>${esc(t.number)}</title><body style="font-family:Arial;padding:32px"><h1>GET TOGETHER 2027</h1><h2>${esc(t.number)}</h2><p><b>Holder:</b> ${esc(t.buyerName)}</p><p><b>Verification:</b> ${esc(t.code)}</p><p><b>Draw:</b> January 16, 2027</p><p>Parkinson's Disease Warriors Philippines</p></body>`;const blob=new Blob([html],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${t.number}.html`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
   function importRelease(){
     const raw=($('buyerReleaseCode')?.value||'').trim();const msg=$('buyerReleaseMsg');
-    try{if(!raw.startsWith(RELEASE_PREFIX))throw new Error('Invalid Ticket Release Code.');const data=JSON.parse(decode(raw.slice(RELEASE_PREFIX.length)));if(!data||!Array.isArray(data.tickets)||!data.tickets.length)throw new Error('No tickets found in this release code.');saveTickets(data);const o=loadOrder();if(o){o.status='verified';localStorage.setItem(ORDER_KEY,JSON.stringify(o))}if(msg)msg.innerHTML='<span class="status verified">TICKETS RECEIVED</span>';renderTickets();renderPaymentStatus();markSeen('tickets')}catch(e){if(msg)msg.innerHTML=`<span class="status rejected">${esc(e.message||'Invalid code')}</span>`}}
+    try{if(!raw.startsWith(RELEASE_PREFIX))throw new Error('Invalid Ticket Release Code.');const data=JSON.parse(decode(raw.slice(RELEASE_PREFIX.length)));if(!data||!Array.isArray(data.tickets)||!data.tickets.length)throw new Error('No tickets found in this release code.');saveTickets(data);syncVerifyStore(data);const o=loadOrder();if(o){o.status='verified';localStorage.setItem(ORDER_KEY,JSON.stringify(o))}if(msg)msg.innerHTML='<span class="status verified">TICKETS RECEIVED</span>';renderTickets();renderPaymentStatus();markSeen('tickets')}catch(e){if(msg)msg.innerHTML=`<span class="status rejected">${esc(e.message||'Invalid code')}</span>`}}
   async function contactOrganizer(){const o=loadOrder();const text=o?`GET TOGETHER 2027 ticket request\nOrder: ${o.requestId}\nBuyer: ${o.buyerName}\nTickets: ${o.qty}\nTotal: ${peso(o.qty*o.price)}\nStatus: ${(o.status||'pending').toUpperCase()}`:'GET TOGETHER 2027 fundraising e-raffle inquiry';try{if(navigator.share)await navigator.share({title:'Contact GET TOGETHER 2027 Organizer',text});else{await navigator.clipboard.writeText(text);alert('Your inquiry details were copied. Send them through the organizer’s official contact channel.')}}catch(e){}}
 
   function build(){
