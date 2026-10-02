@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v6';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js','./event-branding.js','./assets/pd-warriors-logo.jpg','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v7';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -79,9 +79,10 @@ const PHONE_JS=`
 function injectAppEnhancements(response){
   return response.text().then(html=>{
     if(!html.includes('data-phone-proportion-fix')) html=html.replace('</head>',`<style data-phone-proportion-fix>${PHONE_CSS}</style><script data-phone-proportion-fix>${PHONE_JS}<\/script></head>`);
-    if(!html.includes('enhancements.js')) html=html.replace('</head>','<script src="./enhancements.js" defer></script></head>');
-    if(!html.includes('event-branding.js')) html=html.replace('</head>','<script src="./event-branding.js" defer></script></head>');
-    return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
+    html=html.replace(/<script src="\.\/enhancements\.js(?:\?v=\d+)?" defer><\/script>/g,'');
+    html=html.replace(/<script src="\.\/event-branding\.js(?:\?v=\d+)?" defer><\/script>/g,'');
+    html=html.replace('</head>','<script src="./enhancements.js?v=7" defer></script><script src="./event-branding.js?v=7" defer></script></head>');
+    return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, max-age=0'}});
   });
 }
 
@@ -94,6 +95,11 @@ self.addEventListener('fetch',e=>{
       e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectAppEnhancements).catch(async()=>{const cached=await caches.match('./index.html');return cached?injectAppEnhancements(cached):Response.error()}));
       return;
     }
+  }
+  const url=new URL(e.request.url);
+  if(url.pathname.endsWith('/event-branding.js')||url.pathname.endsWith('/enhancements.js')||url.pathname.endsWith('/assets/pd-warriors-logo.jpg')){
+    e.respondWith(fetch(e.request,{cache:'no-store'}));
+    return;
   }
   e.respondWith(fetch(e.request).then(resp=>{if(e.request.method==='GET'){const copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return resp}).catch(()=>caches.match(e.request)));
 });
