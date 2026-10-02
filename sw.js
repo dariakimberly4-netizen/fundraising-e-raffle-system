@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v3';
-const ASSETS=['./','./index.html','./manifest.webmanifest'];
+const CACHE='fundraising-eraffle-v4';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -37,11 +37,7 @@ html.force-phone .searchline{flex-direction:column!important}
 html.force-phone input,html.force-phone select,html.force-phone textarea{font-size:16px!important;padding:12px!important}
 html.force-phone table{min-width:680px!important}
 html.force-phone .footer{font-size:11px!important;padding:20px 14px 28px!important}
-@media(min-width:560px){
-  html.force-phone .nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-  html.force-phone .stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-  html.force-phone .two{grid-template-columns:1fr 1fr!important}
-}
+@media(min-width:560px){html.force-phone .nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}html.force-phone .stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}html.force-phone .two{grid-template-columns:1fr 1fr!important}}
 `;
 
 const PHONE_JS=`
@@ -63,9 +59,7 @@ const PHONE_JS=`
       document.body.style.margin='0';
       document.body.style.zoom=String(scale);
     }else{
-      document.body.style.width='';
-      document.body.style.maxWidth='';
-      document.body.style.zoom='';
+      document.body.style.width='';document.body.style.maxWidth='';document.body.style.zoom='';
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fixDesktopViewport,{once:true});else fixDesktopViewport();
@@ -73,40 +67,23 @@ const PHONE_JS=`
 })();
 `;
 
-function injectPhoneFix(response){
+function injectAppEnhancements(response){
   return response.text().then(html=>{
-    if(!html.includes('data-phone-proportion-fix')){
-      html=html.replace('</head>',`<style data-phone-proportion-fix>${PHONE_CSS}</style><script data-phone-proportion-fix>${PHONE_JS}<\/script></head>`);
-    }
+    if(!html.includes('data-phone-proportion-fix')) html=html.replace('</head>',`<style data-phone-proportion-fix>${PHONE_CSS}</style><script data-phone-proportion-fix>${PHONE_JS}<\/script></head>`);
+    if(!html.includes('enhancements.js')) html=html.replace('</head>','<script src="./enhancements.js" defer></script></head>');
     return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
   });
 }
 
-self.addEventListener('install',e=>e.waitUntil((async()=>{
-  const c=await caches.open(CACHE);
-  await c.addAll(ASSETS);
-  await self.skipWaiting();
-})()));
-
-self.addEventListener('activate',e=>e.waitUntil((async()=>{
-  const keys=await caches.keys();
-  await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
-  await self.clients.claim();
-})()));
-
+self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting()})()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
 self.addEventListener('fetch',e=>{
   if(e.request.mode==='navigate'){
-    e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectPhoneFix).catch(async()=>{
-      const cached=await caches.match('./index.html');
-      return cached?injectPhoneFix(cached):Response.error();
-    }));
-    return;
-  }
-  e.respondWith(fetch(e.request).then(resp=>{
-    if(e.request.method==='GET'){
-      const copy=resp.clone();
-      caches.open(CACHE).then(c=>c.put(e.request,copy));
+    const u=new URL(e.request.url);
+    if(u.pathname.endsWith('/')||u.pathname.endsWith('/index.html')){
+      e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectAppEnhancements).catch(async()=>{const cached=await caches.match('./index.html');return cached?injectAppEnhancements(cached):Response.error()}));
+      return;
     }
-    return resp;
-  }).catch(()=>caches.match(e.request)));
+  }
+  e.respondWith(fetch(e.request).then(resp=>{if(e.request.method==='GET'){const copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return resp}).catch(()=>caches.match(e.request)));
 });
