@@ -49,5 +49,14 @@
       el.addEventListener('click',()=>clearFeature(el,f.key),{once:true});
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});else apply();
+  function loadContentHighlights(){
+    if(document.querySelector('script[data-buyer-content-highlights]'))return;
+    const s=document.createElement('script');
+    s.src='./buyer-content-highlights.js?v=1';
+    s.defer=true;
+    s.dataset.buyerContentHighlights='1';
+    document.head.appendChild(s);
+  }
+  function init(){apply();loadContentHighlights();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
