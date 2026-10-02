@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v5';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v6';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js','./event-branding.js','./assets/pd-warriors-logo.jpg','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -80,6 +80,7 @@ function injectAppEnhancements(response){
   return response.text().then(html=>{
     if(!html.includes('data-phone-proportion-fix')) html=html.replace('</head>',`<style data-phone-proportion-fix>${PHONE_CSS}</style><script data-phone-proportion-fix>${PHONE_JS}<\/script></head>`);
     if(!html.includes('enhancements.js')) html=html.replace('</head>','<script src="./enhancements.js" defer></script></head>');
+    if(!html.includes('event-branding.js')) html=html.replace('</head>','<script src="./event-branding.js" defer></script></head>');
     return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
   });
 }
