@@ -2,7 +2,7 @@
   const REQUEST_PREFIX='ERREQ1.';
   const QR_LIB='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
   const CAMPAIGN={
-    title:'GET TOGETHER 2027 — Fundraising E‑Raffle',
+    title:'GET TOGETHER 2027',
     org:"Parkinson's Disease Warriors Philippines",
     drawDate:'2027-01-16',
     purpose:"Fundraising in support of GET TOGETHER 2027 — New Hope: Moving Forward Beyond Parkinson’s."
