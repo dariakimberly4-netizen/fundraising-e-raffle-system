@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v7';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v8';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -86,6 +86,14 @@ function injectAppEnhancements(response){
   });
 }
 
+function injectBuyerFeatures(response){
+  return response.text().then(html=>{
+    html=html.replace(/<script src="\.\/buyer-feature-highlights\.js(?:\?v=\d+)?" defer><\/script>/g,'');
+    html=html.replace('</head>','<script src="./buyer-feature-highlights.js?v=1" defer></script></head>');
+    return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, max-age=0'}});
+  });
+}
+
 self.addEventListener('install',e=>e.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(ASSETS);await self.skipWaiting()})()));
 self.addEventListener('activate',e=>e.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
 self.addEventListener('fetch',e=>{
@@ -95,9 +103,13 @@ self.addEventListener('fetch',e=>{
       e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectAppEnhancements).catch(async()=>{const cached=await caches.match('./index.html');return cached?injectAppEnhancements(cached):Response.error()}));
       return;
     }
+    if(u.pathname.endsWith('/buy.html')){
+      e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectBuyerFeatures).catch(async()=>{const cached=await caches.match('./buy.html');return cached?injectBuyerFeatures(cached):Response.error()}));
+      return;
+    }
   }
   const url=new URL(e.request.url);
-  if(url.pathname.endsWith('/event-branding.js')||url.pathname.endsWith('/enhancements.js')||url.pathname.endsWith('/assets/pd-warriors-logo.jpg')){
+  if(url.pathname.endsWith('/event-branding.js')||url.pathname.endsWith('/enhancements.js')||url.pathname.endsWith('/buyer-feature-highlights.js')||url.pathname.endsWith('/assets/pd-warriors-logo.jpg')){
     e.respondWith(fetch(e.request,{cache:'no-store'}));
     return;
   }
