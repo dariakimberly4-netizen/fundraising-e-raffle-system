@@ -5,6 +5,9 @@
     title:'GET TOGETHER 2027',
     org:"Parkinson's Disease Warriors Philippines",
     drawDate:'2027-01-16',
+    time:'9:00 AM–1:00 PM',
+    venue:'St. Luke’s Medical Center – Quezon City',
+    theme:'New Hope: Moving Forward Beyond Parkinson’s.',
     purpose:"Fundraising in support of GET TOGETHER 2027 — New Hope: Moving Forward Beyond Parkinson’s."
   };
 
@@ -29,7 +32,20 @@
       if(footer) footer.textContent='GET TOGETHER 2027 • Fundraising E‑Raffle System';
       if(typeof loadSettings==='function') loadSettings();
       if(typeof renderAll==='function') renderAll();
+      applyEventHero();
     }catch(e){}
+  }
+
+  function applyEventHero(){
+    const hero=document.querySelector('#dashboard .hero');
+    if(!hero) return;
+    const p=hero.querySelector('p');
+    if(!p) return;
+    p.innerHTML=`
+      <span style="display:block;font-weight:800;margin-bottom:5px">January 16, 2027</span>
+      <span style="display:block;margin-bottom:5px">9:00 AM–1:00 PM</span>
+      <span style="display:block;margin-bottom:8px">St. Luke’s Medical Center – Quezon City</span>
+      <span style="display:block"><strong>Theme:</strong> “New Hope: Moving Forward Beyond Parkinson’s.”</span>`;
   }
 
   function b64urlDecode(s){
@@ -155,6 +171,6 @@
     setTimeout(()=>{try{if(typeof verifyTicket==='function')verifyTicket();}catch(e){}},100);
   }
 
-  function init(){applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();}
+  function init(){applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();applyEventHero();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
