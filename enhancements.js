@@ -11,8 +11,89 @@
     purpose:"Fundraising in support of GET TOGETHER 2027 — New Hope: Moving Forward Beyond Parkinson’s."
   };
 
+  const SELLER_NEW_FEATURES={
+    sell:'seller-sell-v1',
+    tickets:'seller-etickets-qr-v1',
+    verify:'seller-verify-v1'
+  };
+  const SELLER_SEEN_KEY='gt27_seller_seen_features_v1';
+
   function toastSafe(msg){
     try{ if(typeof toast==='function') toast(msg); else alert(msg); }catch(e){ alert(msg); }
+  }
+
+  function getSellerSeen(){
+    try{return JSON.parse(localStorage.getItem(SELLER_SEEN_KEY)||'{}')||{}}catch(e){return{}}
+  }
+  function setSellerSeen(seen){
+    try{localStorage.setItem(SELLER_SEEN_KEY,JSON.stringify(seen))}catch(e){}
+  }
+  function addSellerHighlightStyle(){
+    if(document.getElementById('sellerNewFeatureStyle')) return;
+    const s=document.createElement('style');
+    s.id='sellerNewFeatureStyle';
+    s.textContent=`
+      #nav button.seller-new-feature,
+      .sidebar button.seller-new-feature{
+        position:relative!important;
+        border:1px solid #e5c85a!important;
+        background:linear-gradient(135deg,#fff9dc,#fff2ae)!important;
+        color:#6e5200!important;
+        box-shadow:0 0 0 3px rgba(215,169,31,.13),0 6px 16px rgba(130,92,0,.10)!important;
+        animation:sellerNewPulse 2.2s ease-in-out infinite;
+      }
+      #nav button.seller-new-feature.active,
+      .sidebar button.seller-new-feature.active{
+        background:linear-gradient(135deg,#246b2d,#3f8732)!important;
+        color:#fff!important;
+        border-color:#d7a91f!important;
+      }
+      .seller-new-badge{
+        display:inline-flex;align-items:center;justify-content:center;
+        margin-left:7px;padding:3px 7px;border-radius:999px;
+        background:#ee3a16;color:#fff;font-size:9px;font-weight:950;
+        line-height:1;letter-spacing:.05em;vertical-align:middle;
+      }
+      @keyframes sellerNewPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+      @media (prefers-reduced-motion:reduce){#nav button.seller-new-feature,.sidebar button.seller-new-feature{animation:none!important}}
+    `;
+    document.head.appendChild(s);
+  }
+  function clearSellerFeature(view){
+    const version=SELLER_NEW_FEATURES[view];
+    if(!version) return;
+    const seen=getSellerSeen();
+    if(seen[view]===version) return;
+    seen[view]=version;setSellerSeen(seen);
+    document.querySelectorAll(`[data-view="${view}"]`).forEach(btn=>{
+      btn.classList.remove('seller-new-feature');
+      btn.querySelector('.seller-new-badge')?.remove();
+    });
+  }
+  function applySellerNewHighlights(){
+    addSellerHighlightStyle();
+    const seen=getSellerSeen();
+    Object.entries(SELLER_NEW_FEATURES).forEach(([view,version])=>{
+      if(seen[view]===version) return;
+      document.querySelectorAll(`[data-view="${view}"]`).forEach(btn=>{
+        btn.classList.add('seller-new-feature');
+        if(!btn.querySelector('.seller-new-badge')){
+          const badge=document.createElement('span');badge.className='seller-new-badge';badge.textContent='NEW';btn.appendChild(badge);
+        }
+        if(!btn.dataset.sellerHighlightBound){
+          btn.dataset.sellerHighlightBound='1';
+          btn.addEventListener('click',()=>clearSellerFeature(view),{once:true});
+        }
+      });
+    });
+    const topSell=[...document.querySelectorAll('.top-actions button')].find(b=>/sell tickets/i.test(b.textContent||''));
+    if(topSell && seen.sell!==SELLER_NEW_FEATURES.sell){
+      topSell.classList.add('seller-new-feature');
+      if(!topSell.querySelector('.seller-new-badge')){
+        const badge=document.createElement('span');badge.className='seller-new-badge';badge.textContent='NEW';topSell.appendChild(badge);
+      }
+      if(!topSell.dataset.sellerHighlightBound){topSell.dataset.sellerHighlightBound='1';topSell.addEventListener('click',()=>clearSellerFeature('sell'),{once:true})}
+    }
   }
 
   function applyCampaignBranding(){
@@ -171,6 +252,11 @@
     setTimeout(()=>{try{if(typeof verifyTicket==='function')verifyTicket();}catch(e){}},100);
   }
 
-  function init(){applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();applyEventHero();}
+  function init(){
+    applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();applyEventHero();
+    applySellerNewHighlights();
+    setTimeout(applySellerNewHighlights,180);
+    setTimeout(applySellerNewHighlights,700);
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
