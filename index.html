@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4b1f70">
+<title>Fundraising E‑Raffle System</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#f7f4fa;--panel:#fff;--ink:#201728;--muted:#72687b;--purple:#4b1f70;--purple2:#6d38a0;
+  --gold:#c89a3b;--line:#e7dfed;--green:#187650;--red:#ad3039;--amber:#9b6519;
+  --shadow:0 12px 34px rgba(61,31,81,.10);--r:20px;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(145deg,#fbf9fc,#f1ecf6);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app{max-width:1180px;margin:auto;min-height:100vh}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;font-weight:900;box-shadow:var(--shadow);border:1px solid #d7bd81}
+.brand h1{font-size:18px;margin:0;line-height:1.08}.brand small{color:var(--muted)}
+.top-actions{display:flex;gap:8px}
+.nav{display:flex;gap:7px;overflow:auto;padding:0 18px 12px;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.nav button{border:0;border-radius:999px;padding:10px 14px;white-space:nowrap;background:#f1ebf5;color:#4d2b61;font-weight:800}
+.nav button.active{background:var(--purple);color:#fff}
+main{padding:18px}.view{display:none}.view.active{display:block}
+.hero{background:radial-gradient(circle at 90% 20%,rgba(255,255,255,.18),transparent 27%),linear-gradient(135deg,#35114f,#6c3498);color:#fff;padding:28px;border-radius:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-65px;bottom:-70px;width:210px;height:210px;border:1px solid rgba(255,255,255,.15);border-radius:50%}
+.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:900;color:#e4c679}
+.hero h2{font-size:clamp(28px,5vw,48px);line-height:1.03;margin:8px 0 10px}.hero p{max-width:760px;color:#efe7f4;margin:0}
+.grid{display:grid;gap:14px}.stats{grid-template-columns:repeat(4,1fr);margin-top:16px}.two{grid-template-columns:1fr 1fr}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 8px 24px rgba(60,32,74,.06)}
+.stat b{display:block;color:var(--purple);font-size:28px}.stat span{font-size:13px;color:var(--muted);font-weight:700}
+.section-title{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:22px 0 10px}.section-title h2{margin:0;font-size:22px}.section-title p{margin:3px 0 0;color:var(--muted)}
+form{display:grid;gap:12px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+label{display:grid;gap:6px;font-size:13px;font-weight:800;color:#46384e}
+input,select,textarea{width:100%;border:1px solid #dcd2e2;border-radius:13px;padding:12px 13px;background:#fff;color:var(--ink);outline:none}
+input:focus,select:focus,textarea:focus{border-color:#8f69aa;box-shadow:0 0 0 3px rgba(112,59,152,.11)}
+.actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}.btn{border:0;border-radius:13px;padding:11px 15px;font-weight:850}
+.primary{background:var(--purple);color:#fff}.secondary{background:#efe8f4;color:#48285c}.gold{background:#f3e6c8;color:#6e4c0f}.danger{background:#fbe7e8;color:var(--red)}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:850}
+.paid{background:#e5f5ed;color:var(--green)}.pending{background:#fff1da;color:var(--amber)}.void{background:#fde7e9;color:var(--red)}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
+table{width:100%;border-collapse:collapse;min-width:760px;background:#fff} th,td{padding:12px;border-bottom:1px solid #eee8f1;text-align:left;font-size:13px}
+th{background:#faf7fc;color:#5e5065;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.empty{text-align:center;color:var(--muted);padding:28px}
+.ticket-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.ticket{background:linear-gradient(135deg,#fff,#fbf7fd);border:1px solid #dfd3e6;border-radius:18px;overflow:hidden;position:relative}
+.ticket-head{background:linear-gradient(135deg,var(--purple),#6f3d96);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;gap:10px}
+.ticket-body{padding:16px}.ticket-no{font-size:25px;font-weight:950;letter-spacing:.04em;color:var(--purple)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.meta div{padding:10px;background:#f7f2fa;border-radius:11px}.meta small{display:block;color:var(--muted);margin-bottom:3px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900}
+.searchline{display:flex;gap:9px}.searchline input{flex:1}
+.drawbox{text-align:center;padding:30px 18px}.drawnum{font-size:clamp(36px,10vw,76px);font-weight:950;color:var(--purple);letter-spacing:.06em;margin:18px 0}.winner{font-size:22px;font-weight:900}.note{color:var(--muted);font-size:13px}
+.bar{height:10px;background:#eee8f1;border-radius:99px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--gold))}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #eee8f1}.kv:last-child{border:0}.kv span{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:50;background:#25182e;color:#fff;padding:11px 15px;border-radius:12px;box-shadow:var(--shadow);display:none;max-width:90vw}
+dialog{border:0;border-radius:22px;box-shadow:0 20px 70px rgba(32,17,41,.25);max-width:720px;width:calc(100% - 28px);padding:0} dialog::backdrop{background:rgba(28,18,34,.45)}
+.modal{padding:20px}.modal h3{margin-top:0}
+.footer{padding:25px 18px 40px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:760px){.stats,.two,.form-grid,.ticket-list{grid-template-columns:1fr}.top{align-items:flex-start}.top-actions{display:none}.hero{padding:22px}.meta{grid-template-columns:1fr}.section-title{align-items:flex-start;flex-direction:column}.searchline{flex-direction:column}}
+@media print{
+  body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%;padding:15mm;background:#fff}
+  .ticket{break-inside:avoid;margin-bottom:8mm}.ticket .actions{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="top">
+    <div class="brand"><div class="logo">ER</div><div><h1 id="brandTitle">Fundraising E‑Raffle</h1><small id="brandOrg">Fundraising Campaign</small></div></div>
+    <div class="top-actions"><button class="btn secondary" onclick="exportData()">Backup</button><button class="btn primary" onclick="showView('sell')">+ Sell Tickets</button></div>
+  </div>
+  <div class="nav" id="nav">
+    <button data-view="dashboard" class="active">Dashboard</button>
+    <button data-view="sell">Sell Tickets</button>
+    <button data-view="tickets">E‑Tickets</button>
+    <button data-view="verify">Verify</button>
+    <button data-view="draw">Raffle Draw</button>
+    <button data-view="reports">Reports</button>
+    <button data-view="settings">Settings</button>
+  </div>
+</header>
+
+<main>
+<section id="dashboard" class="view active">
+  <div class="hero">
+    <div class="eyebrow">Fundraising • Digital Ticketing</div>
+    <h2 id="heroTitle">Raise funds. Issue tickets. Draw fairly.</h2>
+    <p>Designed for fundraising campaigns where supporters may buy one or many raffle tickets. Each paid ticket receives its own unique raffle number and verification code.</p>
+  </div>
+  <div class="grid stats">
+    <div class="card stat"><b id="sRevenue">₱0</b><span>Paid Revenue</span></div>
+    <div class="card stat"><b id="sTickets">0</b><span>Paid Tickets</span></div>
+    <div class="card stat"><b id="sBuyers">0</b><span>Buyers</span></div>
+    <div class="card stat"><b id="sPending">0</b><span>Pending Tickets</span></div>
+  </div>
+  <div class="grid two" style="margin-top:14px">
+    <div class="card"><h3 style="margin-top:0">Campaign Progress</h3><div class="kv"><span>Ticket price</span><b id="dPrice">₱100</b></div><div class="kv"><span>Target tickets</span><b id="dTarget">500</b></div><div class="kv"><span>Paid tickets</span><b id="dPaid">0</b></div><div style="margin-top:13px" class="bar"><span id="progressBar" style="width:0%"></span></div><p class="note" id="progressText">0% of target</p></div>
+    <div class="card"><h3 style="margin-top:0">Recent Sales</h3><div id="recentSales" class="empty">No sales yet.</div></div>
+  </div>
+</section>
+
+<section id="sell" class="view">
+  <div class="section-title"><div><h2>Sell E‑Raffle Tickets</h2><p>A buyer may purchase multiple tickets in one transaction.</p></div></div>
+  <div class="card">
+    <form id="saleForm">
+      <div class="form-grid">
+        <label>Buyer name<input id="buyerName" required placeholder="Full name"></label>
+        <label>Mobile / contact<input id="buyerContact" placeholder="09xx xxx xxxx"></label>
+        <label>Email<input id="buyerEmail" type="email" placeholder="name@example.com"></label>
+        <label>Quantity<input id="qty" type="number" min="1" max="500" value="1" required></label>
+        <label>Price per ticket<input id="price" type="number" min="0" step="0.01" required></label>
+        <label>Payment status<select id="paymentStatus"><option value="paid">Paid</option><option value="pending">Pending</option></select></label>
+        <label>Payment method<select id="paymentMethod"><option>Cash</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Other</option></select></label>
+        <label>Reference no.<input id="paymentRef" placeholder="Optional"></label>
+      </div>
+      <label>Notes<textarea id="notes" rows="2" placeholder="Optional note"></textarea></label>
+      <div class="card" style="background:#faf7fc;box-shadow:none"><div class="kv"><span>Number of tickets</span><b id="sumQty">1</b></div><div class="kv"><span>Total amount</span><b id="sumTotal">₱100</b></div></div>
+      <div class="actions"><button class="btn primary" type="submit">Create Sale & Tickets</button><button class="btn secondary" type="reset">Clear</button></div>
+    </form>
+  </div>
+</section>
+
+<section id="tickets" class="view">
+  <div class="section-title"><div><h2>E‑Tickets</h2><p>Print, save as PDF, or share ticket details.</p></div><div class="actions"><button class="btn secondary" onclick="printAllPaid()">Print Paid Tickets</button></div></div>
+  <div class="card"><div class="searchline"><input id="ticketSearch" placeholder="Search buyer, raffle number or verification code"><select id="ticketFilter"><option value="all">All statuses</option><option value="paid">Paid</option><option value="pending">Pending</option><option value="void">Void</option></select></div></div>
+  <div id="ticketList" class="ticket-list print-area" style="margin-top:14px"></div>
+</section>
+
+<section id="verify" class="view">
+  <div class="section-title"><div><h2>Verify a Ticket</h2><p>Enter the raffle number or verification code shown on the e‑ticket.</p></div></div>
+  <div class="card">
+    <div class="searchline"><input id="verifyInput" placeholder="Example: RFL-2026-00001 or AB12CD34"><button class="btn primary" onclick="verifyTicket()">Verify</button></div>
+    <div id="verifyResult" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<section id="draw" class="view">
+  <div class="section-title"><div><h2>Raffle Draw</h2><p>Only paid and active tickets are eligible. Previous winners are excluded by default.</p></div></div>
+  <div class="card drawbox">
+    <div class="eyebrow" style="color:var(--purple)">Eligible Ticket Pool</div>
+    <div class="drawnum" id="drawNumber">READY</div>
+    <div class="winner" id="drawWinner">No winner drawn yet.</div>
+    <p class="note" id="eligibleCount">0 eligible tickets</p>
+    <div class="actions" style="justify-content:center"><button class="btn primary" id="drawBtn" onclick="drawWinner()">DRAW WINNER</button><button class="btn secondary" onclick="resetDrawDisplay()">Clear Display</button></div>
+  </div>
+  <div class="section-title"><div><h2>Winner History</h2></div></div>
+  <div class="card"><div id="winnerHistory" class="empty">No winners yet.</div></div>
+</section>
+
+<section id="reports" class="view">
+  <div class="section-title"><div><h2>Reports & Records</h2><p>Sales totals, payment status, backups and CSV export.</p></div></div>
+  <div class="grid two">
+    <div class="card"><h3 style="margin-top:0">Summary</h3><div id="reportSummary"></div></div>
+    <div class="card"><h3 style="margin-top:0">Data Tools</h3><div class="actions"><button class="btn primary" onclick="exportCSV()">Export CSV</button><button class="btn secondary" onclick="exportData()">Backup JSON</button><label class="btn secondary" style="display:inline-flex;align-items:center">Restore JSON<input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></label></div><p class="note">Your data is stored in this browser. Export backups regularly.</p></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0">Transactions</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Buyer</th><th>Qty</th><th>Total</th><th>Status</th><th>Method</th><th>Reference</th></tr></thead><tbody id="salesTable"></tbody></table></div></div>
+</section>
+
+<section id="settings" class="view">
+  <div class="section-title"><div><h2>Campaign Settings</h2><p>Customize the system for your fundraiser.</p></div></div>
+  <div class="card">
+    <form id="settingsForm">
+      <div class="form-grid">
+        <label>Campaign title<input id="setTitle"></label>
+        <label>Organizer / beneficiary<input id="setOrg"></label>
+        <label>Default ticket price<input id="setPrice" type="number" min="0" step="0.01"></label>
+        <label>Target ticket sales<input id="setTarget" type="number" min="1"></label>
+        <label>Draw date<input id="setDrawDate" type="date"></label>
+        <label>Permit / reference<input id="setPermit" placeholder="Optional permit or internal reference"></label>
+      </div>
+      <label>Fundraising purpose<textarea id="setPurpose" rows="3"></textarea></label>
+      <div class="actions"><button class="btn primary" type="submit">Save Settings</button><button type="button" class="btn danger" onclick="clearAllData()">Reset All Data</button></div>
+    </form>
+  </div>
+</section>
+</main>
+<div class="footer">Fundraising E‑Raffle System • Offline-first browser edition</div>
+</div>
+
+<dialog id="ticketDialog"><div class="modal"><div id="ticketModalContent"></div><div class="actions" style="margin-top:14px"><button class="btn primary" onclick="window.print()">Print / Save PDF</button><button class="btn secondary" onclick="document.getElementById('ticketDialog').close()">Close</button></div></div></dialog>
+<div id="toast" class="toast"></div>
+
+<script>
+const KEY='fundraising_eraffle_v1';
+const defaults={
+ settings:{title:'Fundraising E‑Raffle',org:'Fundraising Campaign',price:100,target:500,drawDate:'',permit:'',purpose:'Support our fundraising campaign.'},
+ sales:[],tickets:[],winners:[],nextTicket:1
+};
+let db=load();
+
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x?Object.assign(structuredClone(defaults),x):structuredClone(defaults)}catch(e){return structuredClone(defaults)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const nowISO=()=>new Date().toISOString();
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(window._tt);window._tt=setTimeout(()=>t.style.display='none',2200)}
+function randCode(){const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let a=new Uint32Array(8);crypto.getRandomValues(a);return [...a].map(x=>chars[x%chars.length]).join('')}
+function ticketNo(n){return `RFL-${new Date().getFullYear()}-${String(n).padStart(5,'0')}`}
+function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
+
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo({top:0,behavior:'smooth'});renderAll()}
+document.getElementById('qty').addEventListener('input',calcSale);document.getElementById('price').addEventListener('input',calcSale);
+document.getElementById('ticketSearch').addEventListener('input',renderTickets);document.getElementById('ticketFilter').addEventListener('change',renderTickets);
+
+function calcSale(){const q=+document.getElementById('qty').value||0,p=+document.getElementById('price').value||0;document.getElementById('sumQty').textContent=q;document.getElementById('sumTotal').textContent=peso(q*p)}
+
+document.getElementById('saleForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const qty=Math.max(1,Math.min(500,+document.getElementById('qty').value||1));
+ const price=+document.getElementById('price').value||0;
+ const status=document.getElementById('paymentStatus').value;
+ const sale={
+   id:uid(),createdAt:nowISO(),buyerName:document.getElementById('buyerName').value.trim(),contact:document.getElementById('buyerContact').value.trim(),
+   email:document.getElementById('buyerEmail').value.trim(),qty,price,total:qty*price,status,
+   method:document.getElementById('paymentMethod').value,ref:document.getElementById('paymentRef').value.trim(),notes:document.getElementById('notes').value.trim()
+ };
+ if(!sale.buyerName){toast('Buyer name is required.');return}
+ db.sales.unshift(sale);
+ for(let i=0;i<qty;i++){
+   db.tickets.unshift({id:uid(),saleId:sale.id,number:ticketNo(db.nextTicket++),code:randCode(),buyerName:sale.buyerName,contact:sale.contact,email:sale.email,price,status,createdAt:sale.createdAt,voided:false})
+ }
+ localStorage.setItem(KEY,JSON.stringify(db));
+ e.target.reset();document.getElementById('qty').value=1;document.getElementById('price').value=db.settings.price;calcSale();renderAll();showView('tickets');toast(`${qty} ticket${qty>1?'s':''} created.`);
+});
+
+function setSaleStatus(saleId,status){
+ const sale=db.sales.find(s=>s.id===saleId);if(!sale)return;sale.status=status;
+ db.tickets.filter(t=>t.saleId===saleId).forEach(t=>{if(!t.voided)t.status=status});save();toast(`Sale marked ${status}.`)
+}
+function voidTicket(id){if(!confirm('Void this ticket? It will no longer be eligible for the raffle draw.'))return;const t=db.tickets.find(x=>x.id===id);if(t){t.voided=true;t.status='void';save();toast('Ticket voided.')}}
+function restoreTicket(id){const t=db.tickets.find(x=>x.id===id);if(t){const s=db.sales.find(x=>x.id===t.saleId);t.voided=false;t.status=s?.status||'pending';save();toast('Ticket restored.')}}
+
+function ticketHTML(t,withActions=true){
+ const status=t.voided?'void':t.status;
+ return `<article class="ticket">
+   <div class="ticket-head"><div><b>${esc(db.settings.title)}</b><div style="font-size:12px;opacity:.8">${esc(db.settings.org)}</div></div><span class="badge ${status}">${status.toUpperCase()}</span></div>
+   <div class="ticket-body">
+     <div class="ticket-no">${esc(t.number)}</div>
+     <div class="note">${esc(db.settings.purpose||'Fundraising raffle ticket')}</div>
+     <div class="meta">
+       <div><small>Ticket holder</small><b>${esc(t.buyerName)}</b></div>
+       <div><small>Ticket value</small><b>${peso(t.price)}</b></div>
+       <div><small>Verification code</small><span class="code">${esc(t.code)}</span></div>
+       <div><small>Draw date</small><b>${esc(db.settings.drawDate||'To be announced')}</b></div>
+     </div>
+     ${db.settings.permit?`<p class="note">Reference: ${esc(db.settings.permit)}</p>`:''}
+     ${withActions?`<div class="actions" style="margin-top:13px"><button class="btn primary" onclick="openTicket('${t.id}')">Open / Print</button><button class="btn secondary" onclick="shareTicket('${t.id}')">Share</button>${t.voided?`<button class="btn gold" onclick="restoreTicket('${t.id}')">Restore</button>`:`<button class="btn danger" onclick="voidTicket('${t.id}')">Void</button>`}</div>`:''}
+   </div>
+ </article>`
+}
+function renderTickets(){
+ const q=(document.getElementById('ticketSearch')?.value||'').toLowerCase();const f=document.getElementById('ticketFilter')?.value||'all';
+ const list=db.tickets.filter(t=>{const status=t.voided?'void':t.status;return(f==='all'||status===f)&&(`${t.number} ${t.code} ${t.buyerName}`.toLowerCase().includes(q))});
+ document.getElementById('ticketList').innerHTML=list.length?list.map(t=>ticketHTML(t,true)).join(''):`<div class="card empty" style="grid-column:1/-1">No tickets found.</div>`;
+}
+function openTicket(id){const t=db.tickets.find(x=>x.id===id);if(!t)return;document.getElementById('ticketModalContent').innerHTML=`<div class="print-area">${ticketHTML(t,false)}</div>`;document.getElementById('ticketDialog').showModal()}
+async function shareTicket(id){const t=db.tickets.find(x=>x.id===id);if(!t)return;const txt=`${db.settings.title}\nTicket: ${t.number}\nHolder: ${t.buyerName}\nStatus: ${t.voided?'VOID':t.status.toUpperCase()}\nVerification: ${t.code}\nDraw: ${db.settings.drawDate||'To be announced'}`;if(navigator.share){try{await navigator.share({title:db.settings.title,text:txt})}catch(e){}}else{await navigator.clipboard.writeText(txt);toast('Ticket details copied.')}}
+function printAllPaid(){const old=document.getElementById('ticketSearch').value,of=document.getElementById('ticketFilter').value;document.getElementById('ticketSearch').value='';document.getElementById('ticketFilter').value='paid';renderTickets();setTimeout(()=>{window.print();document.getElementById('ticketSearch').value=old;document.getElementById('ticketFilter').value=of;renderTickets()},200)}
+
+function verifyTicket(){
+ const q=document.getElementById('verifyInput').value.trim().toLowerCase();
+ const t=db.tickets.find(x=>x.number.toLowerCase()===q||x.code.toLowerCase()===q);
+ const box=document.getElementById('verifyResult');
+ if(!t){box.innerHTML=`<div class="card" style="border-color:#f2c9cc;background:#fff8f8"><b style="color:var(--red)">NOT FOUND</b><p class="note">No ticket matches that raffle number or verification code.</p></div>`;return}
+ const status=t.voided?'void':t.status;
+ box.innerHTML=`<div class="card"><span class="badge ${status}">${status.toUpperCase()}</span><h3>${esc(t.number)}</h3><div class="kv"><span>Holder</span><b>${esc(t.buyerName)}</b></div><div class="kv"><span>Verification</span><b class="code">${esc(t.code)}</b></div><div class="kv"><span>Eligible for draw</span><b>${status==='paid'?'YES':'NO'}</b></div></div>`;
+}
+
+function eligibleTickets(){const won=new Set(db.winners.map(w=>w.ticketId));return db.tickets.filter(t=>t.status==='paid'&&!t.voided&&!won.has(t.id))}
+function securePick(arr){if(!arr.length)return null;const a=new Uint32Array(1);crypto.getRandomValues(a);return arr[a[0]%arr.length]}
+function drawWinner(){
+ const pool=eligibleTickets();if(!pool.length){toast('No eligible paid tickets available.');return}
+ const btn=document.getElementById('drawBtn');btn.disabled=true;let ticks=0;
+ const spin=setInterval(()=>{const t=securePick(pool);document.getElementById('drawNumber').textContent=t.number;document.getElementById('drawWinner').textContent=t.buyerName;ticks++},75);
+ setTimeout(()=>{clearInterval(spin);const t=securePick(pool);const w={id:uid(),ticketId:t.id,number:t.number,buyerName:t.buyerName,drawnAt:nowISO()};db.winners.unshift(w);localStorage.setItem(KEY,JSON.stringify(db));document.getElementById('drawNumber').textContent=t.number;document.getElementById('drawWinner').textContent=`WINNER: ${t.buyerName}`;btn.disabled=false;renderAll();toast('Winner recorded.')},1800)
+}
+function resetDrawDisplay(){document.getElementById('drawNumber').textContent='READY';document.getElementById('drawWinner').textContent='No winner drawn yet.'}
+function renderWinners(){
+ const el=document.getElementById('winnerHistory');
+ if(!db.winners.length){el.className='empty';el.innerHTML='No winners yet.';return}
+ el.className='table-wrap';el.innerHTML=`<table><thead><tr><th>Drawn</th><th>Ticket</th><th>Winner</th></tr></thead><tbody>${db.winners.map(w=>`<tr><td>${new Date(w.drawnAt).toLocaleString()}</td><td><b>${esc(w.number)}</b></td><td>${esc(w.buyerName)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+document.getElementById('settingsForm').addEventListener('submit',e=>{
+ e.preventDefault();db.settings={title:document.getElementById('setTitle').value.trim()||'Fundraising E‑Raffle',org:document.getElementById('setOrg').value.trim(),price:+document.getElementById('setPrice').value||0,target:+document.getElementById('setTarget').value||1,drawDate:document.getElementById('setDrawDate').value,permit:document.getElementById('setPermit').value.trim(),purpose:document.getElementById('setPurpose').value.trim()};save();toast('Settings saved.')
+});
+function loadSettings(){const s=db.settings;document.getElementById('setTitle').value=s.title;document.getElementById('setOrg').value=s.org;document.getElementById('setPrice').value=s.price;document.getElementById('setTarget').value=s.target;document.getElementById('setDrawDate').value=s.drawDate||'';document.getElementById('setPermit').value=s.permit||'';document.getElementById('setPurpose').value=s.purpose||'';document.getElementById('price').value=s.price}
+
+function renderDashboard(){
+ const paidTickets=db.tickets.filter(t=>t.status==='paid'&&!t.voided),pending=db.tickets.filter(t=>t.status==='pending'&&!t.voided);
+ const revenue=paidTickets.reduce((a,t)=>a+Number(t.price||0),0);const buyers=new Set(paidTickets.map(t=>t.saleId)).size;
+ document.getElementById('sRevenue').textContent=peso(revenue);document.getElementById('sTickets').textContent=paidTickets.length;document.getElementById('sBuyers').textContent=buyers;document.getElementById('sPending').textContent=pending.length;
+ document.getElementById('dPrice').textContent=peso(db.settings.price);document.getElementById('dTarget').textContent=db.settings.target;document.getElementById('dPaid').textContent=paidTickets.length;
+ const pct=Math.min(100,Math.round((paidTickets.length/Math.max(1,db.settings.target))*100));document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressText').textContent=`${pct}% of target`;
+ const rs=db.sales.slice(0,5);document.getElementById('recentSales').innerHTML=rs.length?rs.map(s=>`<div class="kv"><div><b>${esc(s.buyerName)}</b><div class="note">${s.qty} ticket${s.qty>1?'s':''} • ${new Date(s.createdAt).toLocaleDateString()}</div></div><div style="text-align:right"><b>${peso(s.total)}</b><br><span class="badge ${s.status}">${s.status}</span></div></div>`).join(''):'<div class="empty">No sales yet.</div>';
+}
+function renderReports(){
+ const paid=db.tickets.filter(t=>t.status==='paid'&&!t.voided),pending=db.tickets.filter(t=>t.status==='pending'&&!t.voided),voided=db.tickets.filter(t=>t.voided);
+ const rev=paid.reduce((a,t)=>a+Number(t.price||0),0);
+ document.getElementById('reportSummary').innerHTML=`<div class="kv"><span>Paid revenue</span><b>${peso(rev)}</b></div><div class="kv"><span>Paid tickets</span><b>${paid.length}</b></div><div class="kv"><span>Pending tickets</span><b>${pending.length}</b></div><div class="kv"><span>Voided tickets</span><b>${voided.length}</b></div><div class="kv"><span>Recorded winners</span><b>${db.winners.length}</b></div>`;
+ const tbody=document.getElementById('salesTable');tbody.innerHTML=db.sales.length?db.sales.map(s=>`<tr><td>${new Date(s.createdAt).toLocaleString()}</td><td><b>${esc(s.buyerName)}</b><br><span class="note">${esc(s.contact||s.email||'')}</span></td><td>${s.qty}</td><td>${peso(s.total)}</td><td><select onchange="setSaleStatus('${s.id}',this.value)"><option value="paid" ${s.status==='paid'?'selected':''}>Paid</option><option value="pending" ${s.status==='pending'?'selected':''}>Pending</option></select></td><td>${esc(s.method)}</td><td>${esc(s.ref||'—')}</td></tr>`).join(''):`<tr><td colspan="7" class="empty">No transactions yet.</td></tr>`;
+}
+function exportCSV(){
+ const rows=[['Ticket No','Verification Code','Buyer','Contact','Email','Price','Status','Created At','Sale ID']];
+ db.tickets.forEach(t=>rows.push([t.number,t.code,t.buyerName,t.contact,t.email,t.price,t.voided?'void':t.status,t.createdAt,t.saleId]));
+ const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');download('raffle-tickets.csv',csv,'text/csv;charset=utf-8')
+}
+function exportData(){download('fundraising-eraffle-backup.json',JSON.stringify(db,null,2),'application/json')}
+function download(name,content,type){const b=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.settings||!Array.isArray(x.tickets)||!Array.isArray(x.sales))throw new Error();if(confirm('Restore this backup and replace the current data?')){db=x;save();loadSettings();toast('Backup restored.')}}catch(err){toast('Invalid backup file.')}};r.readAsText(f);e.target.value=''}
+function clearAllData(){if(!confirm('Reset the entire raffle system? This deletes all sales, tickets and winner history from this browser.'))return;if(!confirm('Final confirmation: permanently reset local data?'))return;db=structuredClone(defaults);save();loadSettings();toast('System reset.')}
+
+function renderAll(){
+ document.getElementById('brandTitle').textContent=db.settings.title;document.getElementById('brandOrg').textContent=db.settings.org||'Fundraising Campaign';document.getElementById('heroTitle').textContent=db.settings.title;
+ renderDashboard();renderTickets();renderWinners();renderReports();document.getElementById('eligibleCount').textContent=`${eligibleTickets().length} eligible ticket${eligibleTickets().length===1?'':'s'}`;
+}
+loadSettings();calcSale();renderAll();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
