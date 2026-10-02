@@ -14,7 +14,8 @@
   const SELLER_NEW_FEATURES={
     sell:'seller-sell-v1',
     tickets:'seller-etickets-qr-v1',
-    verify:'seller-verify-v1'
+    verify:'seller-verify-v1',
+    reports:'seller-simple-search-status-v1'
   };
   const SELLER_SEEN_KEY='gt27_seller_seen_features_v1';
 
@@ -54,8 +55,16 @@
         background:#ee3a16;color:#fff;font-size:9px;font-weight:950;
         line-height:1;letter-spacing:.05em;vertical-align:middle;
       }
+      #simpleSellerTools .seller-tool-result{padding:12px 0;border-bottom:1px solid #edf2ea}
+      #simpleSellerTools .seller-tool-result:last-child{border-bottom:0}
+      #simpleSellerTools .seller-tool-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+      #simpleSellerTools .seller-tool-tickets{font-size:12px;color:#6b7567;margin-top:5px;word-break:break-word}
+      #simpleSellerTools .seller-tool-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+      #simpleSellerTools .seller-status-paid{color:#187650;font-weight:900}
+      #simpleSellerTools .seller-status-pending{color:#9b6519;font-weight:900}
       @keyframes sellerNewPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
       @media (prefers-reduced-motion:reduce){#nav button.seller-new-feature,.sidebar button.seller-new-feature{animation:none!important}}
+      @media(max-width:760px){#simpleSellerTools .seller-tool-top{flex-direction:column}}
     `;
     document.head.appendChild(s);
   }
@@ -94,6 +103,63 @@
       }
       if(!topSell.dataset.sellerHighlightBound){topSell.dataset.sellerHighlightBound='1';topSell.addEventListener('click',()=>clearSellerFeature('sell'),{once:true})}
     }
+  }
+
+  function escSimple(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+  function pesoSimple(n){return '₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:2})}
+  function renderSimpleSellerResults(){
+    const box=document.getElementById('sellerQuickResults');
+    const input=document.getElementById('sellerQuickSearch');
+    if(!box||!input||typeof db==='undefined') return;
+    const q=(input.value||'').trim().toLowerCase();
+    let sales=[...(db.sales||[])];
+    if(q){
+      sales=sales.filter(s=>{
+        const tickets=(db.tickets||[]).filter(t=>t.saleId===s.id);
+        const hay=[s.buyerName,s.contact,s.email,s.ref,s.method,s.id,...tickets.flatMap(t=>[t.number,t.code])].join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+    }else sales=sales.slice(0,10);
+    if(!sales.length){box.innerHTML='<div class="empty">No matching sales or tickets.</div>';return}
+    box.innerHTML=sales.map(s=>{
+      const tickets=(db.tickets||[]).filter(t=>t.saleId===s.id);
+      const ticketText=tickets.map(t=>`${escSimple(t.number)}${t.code?' • '+escSimple(t.code):''}`).join(' | ')||'No tickets';
+      const status=s.status==='paid'?'paid':'pending';
+      const next=status==='paid'?'pending':'paid';
+      return `<div class="seller-tool-result">
+        <div class="seller-tool-top">
+          <div><b>${escSimple(s.buyerName||'Unnamed buyer')}</b><div class="note">${escSimple(s.contact||s.email||'No contact')} • ${s.qty||0} ticket${Number(s.qty)!==1?'s':''}</div></div>
+          <div style="text-align:right"><b>${pesoSimple(s.total)}</b><div class="seller-status-${status}">${status.toUpperCase()}</div></div>
+        </div>
+        <div class="seller-tool-tickets">${ticketText}</div>
+        <div class="seller-tool-actions"><button type="button" class="btn ${next==='paid'?'primary':'secondary'}" data-sale-id="${escSimple(s.id)}" data-sale-next="${next}">Mark ${next==='paid'?'Paid':'Pending'}</button></div>
+      </div>`;
+    }).join('');
+    box.querySelectorAll('[data-sale-id]').forEach(btn=>btn.onclick=()=>{
+      try{
+        if(typeof setSaleStatus==='function') setSaleStatus(btn.dataset.saleId,btn.dataset.saleNext);
+        else{
+          const sale=(db.sales||[]).find(x=>x.id===btn.dataset.saleId);
+          if(sale){sale.status=btn.dataset.saleNext;(db.tickets||[]).filter(t=>t.saleId===sale.id&&!t.voided).forEach(t=>t.status=btn.dataset.saleNext);localStorage.setItem('fundraising_eraffle_v1',JSON.stringify(db));}
+        }
+        renderSimpleSellerResults();
+      }catch(e){toastSafe('Unable to update payment status.')}
+    });
+  }
+  function addSimpleSellerTools(){
+    const reports=document.getElementById('reports');
+    if(!reports||document.getElementById('simpleSellerTools')) return;
+    const firstCard=reports.querySelector('.card');
+    const box=document.createElement('div');
+    box.id='simpleSellerTools';box.className='card';box.style.marginBottom='14px';
+    box.innerHTML=`<h3 style="margin:0 0 6px">Find Buyer / Ticket</h3>
+      <p class="note" style="margin:0 0 12px">Search by buyer name, mobile, email, payment reference, raffle number, or verification code.</p>
+      <div class="searchline"><input id="sellerQuickSearch" placeholder="Search buyer or ticket number"><button type="button" class="btn secondary" id="sellerQuickClear">Clear</button></div>
+      <div id="sellerQuickResults" style="margin-top:10px"></div>`;
+    if(firstCard) firstCard.parentNode.insertBefore(box,firstCard); else reports.appendChild(box);
+    document.getElementById('sellerQuickSearch').addEventListener('input',renderSimpleSellerResults);
+    document.getElementById('sellerQuickClear').onclick=()=>{document.getElementById('sellerQuickSearch').value='';renderSimpleSellerResults()};
+    renderSimpleSellerResults();
   }
 
   function applyCampaignBranding(){
@@ -253,10 +319,10 @@
   }
 
   function init(){
-    applyCampaignBranding();addBuyerImport();wrapTicketFunctions();handleVerifyQuery();applyEventHero();
+    applyCampaignBranding();addBuyerImport();addSimpleSellerTools();wrapTicketFunctions();handleVerifyQuery();applyEventHero();
     applySellerNewHighlights();
-    setTimeout(applySellerNewHighlights,180);
-    setTimeout(applySellerNewHighlights,700);
+    setTimeout(()=>{addSimpleSellerTools();applySellerNewHighlights();renderSimpleSellerResults()},180);
+    setTimeout(()=>{addSimpleSellerTools();applySellerNewHighlights();renderSimpleSellerResults()},700);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
