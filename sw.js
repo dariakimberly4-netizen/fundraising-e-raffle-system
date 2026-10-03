@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v14';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-section-highlights.js?v=1','./seller-release.js?v=1','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v15';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-section-highlights.js?v=1','./seller-release.js?v=1','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=1','./seller-next-tools.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -85,7 +85,8 @@ function injectAppEnhancements(response){
     html=html.replace(/<script src="\.\/seller-release\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/seller-simple-overview\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/seller-force-highlights\.js(?:\?v=\d+)?" defer><\/script>/g,'');
-    html=html.replace('</head>','<script src="./enhancements.js?v=7" defer></script><script src="./event-branding.js?v=7" defer></script><script src="./seller-feature-highlights.js?v=1" defer></script><script src="./seller-release.js?v=1" defer></script><script src="./seller-simple-overview.js?v=4" defer></script><script src="./seller-force-highlights.js?v=1" defer></script></head>');
+    html=html.replace(/<script src="\.\/seller-next-tools\.js(?:\?v=\d+)?" defer><\/script>/g,'');
+    html=html.replace('</head>','<script src="./enhancements.js?v=7" defer></script><script src="./event-branding.js?v=7" defer></script><script src="./seller-feature-highlights.js?v=1" defer></script><script src="./seller-release.js?v=1" defer></script><script src="./seller-simple-overview.js?v=4" defer></script><script src="./seller-force-highlights.js?v=1" defer></script><script src="./seller-next-tools.js?v=1" defer></script></head>');
     return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, max-age=0'}});
   });
 }
@@ -115,7 +116,7 @@ self.addEventListener('fetch',e=>{
     }
   }
   const url=new URL(e.request.url);
-  if(url.pathname.endsWith('/event-branding.js')||url.pathname.endsWith('/enhancements.js')||url.pathname.endsWith('/buyer-feature-highlights.js')||url.pathname.endsWith('/seller-feature-highlights.js')||url.pathname.endsWith('/buyer-completion.js')||url.pathname.endsWith('/buyer-section-highlights.js')||url.pathname.endsWith('/seller-release.js')||url.pathname.endsWith('/seller-simple-overview.js')||url.pathname.endsWith('/seller-force-highlights.js')||url.pathname.endsWith('/assets/pd-warriors-logo.jpg')){
+  if(url.pathname.endsWith('/event-branding.js')||url.pathname.endsWith('/enhancements.js')||url.pathname.endsWith('/buyer-feature-highlights.js')||url.pathname.endsWith('/seller-feature-highlights.js')||url.pathname.endsWith('/buyer-completion.js')||url.pathname.endsWith('/buyer-section-highlights.js')||url.pathname.endsWith('/seller-release.js')||url.pathname.endsWith('/seller-simple-overview.js')||url.pathname.endsWith('/seller-force-highlights.js')||url.pathname.endsWith('/seller-next-tools.js')||url.pathname.endsWith('/assets/pd-warriors-logo.jpg')){
     e.respondWith(fetch(e.request,{cache:'no-store'}));
     return;
   }
