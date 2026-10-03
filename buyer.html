@@ -22,11 +22,51 @@ button,input,select,textarea{font:inherit}.app{min-height:100svh}.topbar{height:
 #referredBy,#referralSource{pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:20!important;-webkit-user-select:text!important;user-select:text!important;opacity:1!important;visibility:visible!important}
 #referredBy:disabled,#referralSource:disabled{pointer-events:auto!important;opacity:1!important}
 label:has(#referredBy),label:has(#referralSource){pointer-events:auto!important;position:relative!important;z-index:20!important}
-</style></head>
+</style>
+<style id="buyerNativeMenuV2">
+.nativeBuyerMenu{display:none}
+.nativeBuyerMenu summary{list-style:none}
+.nativeBuyerMenu summary::-webkit-details-marker{display:none}
+.nativeBuyerMenuPanel a{display:flex;align-items:center;min-height:48px;padding:12px 14px;border-bottom:1px solid #edf2ea;color:#246b2d;text-decoration:none;font-weight:900;background:#fff;touch-action:manipulation}
+.nativeBuyerMenuPanel a:last-child{border-bottom:0}
+.nativeIntroCard{margin-top:14px;padding:16px;border:1px solid #dce9d6;border-radius:16px;background:#f7fbf4;text-align:center;color:#355336;line-height:1.6}
+.nativeIntroCard h3{margin:0 0 8px;color:#246b2d;font-family:Georgia,"Times New Roman",serif;font-size:22px}
+.nativeIntroCard p{margin:0!important}
+.nativeIntroCard .introBuyNow{display:inline-flex;margin-top:12px;min-height:48px;padding:12px 18px;border-radius:13px;background:#ee3a16;color:#fff;text-decoration:none;font-weight:950;align-items:center;justify-content:center}
+@media(max-width:780px){
+  #menuBtn{display:none!important}
+  .nativeBuyerMenu{display:block;grid-column:1;grid-row:1;justify-self:start;position:relative;z-index:2147483000}
+  .nativeBuyerMenu summary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 13px;border:1px solid #dfe8d9;border-radius:12px;background:#f4f8f1;color:#246b2d;font-weight:950;cursor:pointer;touch-action:manipulation;position:relative;z-index:2147483001}
+  .nativeBuyerMenu[open] .nativeBuyerMenuPanel{display:block}
+  .nativeBuyerMenuPanel{position:fixed;left:10px;top:70px;width:min(310px,calc(100vw - 20px));max-height:calc(100svh - 84px);overflow:auto;border:1px solid #dfe8d9;border-radius:16px;background:#fff;box-shadow:0 18px 45px rgba(34,48,34,.24);z-index:2147483001}
+  main.content:has(.view:target) .view{display:none!important}
+  main.content .view:target{display:block!important}
+}
+</style>
+</head>
 <body>
 <div class="app">
 <header class="topbar">
   <button id="menuBtn" class="menuBtn" type="button" aria-controls="sidebar" aria-expanded="false">☰ Menu</button>
+<details class="nativeBuyerMenu" id="nativeBuyerMenu">
+  <summary aria-label="Open buyer menu">☰ Menu</summary>
+  <nav class="nativeBuyerMenuPanel" aria-label="Buyer navigation">
+    <a href="#introduction" onclick="this.closest('details').removeAttribute('open')">Introduction</a>
+    <a href="#buy" onclick="this.closest('details').removeAttribute('open')">Buy Tickets</a>
+    <a href="#request" onclick="this.closest('details').removeAttribute('open')">My Request</a>
+    <a href="#tickets" onclick="this.closest('details').removeAttribute('open')">My E-Tickets</a>
+    <a href="#paymentdetails" onclick="this.closest('details').removeAttribute('open')">Payment Details & Status</a>
+    <a href="#payment" onclick="this.closest('details').removeAttribute('open')">Payment Guide</a>
+    <a href="#draw" onclick="this.closest('details').removeAttribute('open')">Draw Information</a>
+    <a href="#rules" onclick="this.closest('details').removeAttribute('open')">Raffle Rules</a>
+    <a href="#event" onclick="this.closest('details').removeAttribute('open')">Event Details</a>
+    <a href="#howitworks" onclick="this.closest('details').removeAttribute('open')">How It Works</a>
+    <a href="#contact" onclick="this.closest('details').removeAttribute('open')">Contact Organizer</a>
+    <a href="#faq" onclick="this.closest('details').removeAttribute('open')">FAQs</a>
+    <a href="./verify.html">Verify Ticket</a>
+  </nav>
+</details>
+
   <div class="brand"><img src="./assets/pd-warriors-logo.jpg" alt="Parkinson's Disease Warriors Philippines logo"><span class="buyerPortalLabel">Buyer Portal</span></div><div class="buyerCenterTitle">Fundraising E‑Raffle</div>
 </header>
 <div id="overlay" class="overlay"></div>
@@ -47,6 +87,12 @@ label:has(#referredBy),label:has(#referralSource){pointer-events:auto!important;
   <div class="hero">
     <div class="eyebrow">Parkinson's Disease Warriors Philippines • Fundraising E‑Raffle</div>
     <h2>GET TOGETHER 2027</h2>
+<div class="nativeIntroCard" id="nativeIntroCard">
+  <h3>Welcome to the Fundraising E-Raffle</h3>
+  <p>Every raffle ticket helps support Parkinson's Disease Warriors Philippines and its community activities. You do not need to attend GET TOGETHER 2027 to join. Choose the number of tickets you want, enter your buyer and payment details, and submit your request for confirmation. Once confirmed, you will receive the exact number of official e-tickets you purchased.</p>
+  <a class="introBuyNow" href="#buy">BUY RAFFLE TICKETS</a>
+</div>
+
     <p class="introLead">Support Parkinson’s Disease Warriors Philippines through our GET TOGETHER 2027 fundraising raffle.</p>
     <p class="introNote">This raffle is open to supporters and is <b>not limited to event attendees</b>. You may purchase one or several tickets, and you may optionally request your preferred raffle number, subject to availability and seller confirmation.</p>
     <div class="introBenefits">

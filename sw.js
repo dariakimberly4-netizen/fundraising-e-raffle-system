@@ -1,4 +1,4 @@
-const CACHE='fundraising-eraffle-v27';
+const CACHE='fundraising-eraffle-v28';
 const ASSETS=['./','./index.html','./seller-login.html','./seller.webmanifest','./seller-pwa.js?v=1','./seller-friendly.js?v=1','./seller-offline-workflow.js?v=1','./seller-role-access.js','./seller-overview-emphasis.js','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-menu-structure.js?v=3','./buyer-menu-fix.js?v=3','./buyer-section-highlights.js?v=3','./buyer-number-choice.js?v=1','./seller-release.js?v=2','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=2','./seller-next-tools.js?v=1','./seller-ops-tools.js?v=1','./seller-final-tools.js?v=1','./seller-control-number.js?v=1','./seller-number-choice.js?v=2','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./buyer.html','./buyer-profiles.js?v=2','./buyer-friendly.js?v=3','./buyer-pwa.js?v=1','./buyer-public-only.js?v=1','./buyer-offline-workflow.js?v=1','./buyer.webmanifest','./verify.html'];
 
 const PHONE_CSS=`
