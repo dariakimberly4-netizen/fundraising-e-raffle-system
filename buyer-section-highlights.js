@@ -7,7 +7,8 @@
     rules:{label:'Raffle Rules',version:'v1'}
   };
   function getSeen(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return{}}}
-  function saveSeen(x){try{localStorage.setItem(KEY,JSON.stringify(x))}catch(e){}}
+  function saveSeen(x){try{localStorage.setItem(KEY,JSON.stringify(x))}catch(e){}
+  }
   function addStyle(){
     if(document.getElementById('buyerVisibleNewStyle'))return;
     const s=document.createElement('style');s.id='buyerVisibleNewStyle';s.textContent=`
@@ -25,41 +26,17 @@
     btn.classList.add('buyer-visible-new');
     if(!btn.querySelector('.buyer-visible-badge')){const b=document.createElement('span');b.className='buyer-visible-badge';b.textContent='NEW';btn.appendChild(b)}
   }
-  function showSectionHighlight(view){
-    const sec=document.getElementById(view);const card=sec?.querySelector('.card');if(card)card.classList.add('buyer-section-new');
-  }
-  function clearMenu(view){
-    const btn=document.querySelector(`.sideNav [data-view="${view}"]`);if(!btn)return;
-    btn.classList.remove('buyer-visible-new');btn.querySelector('.buyer-visible-badge')?.remove();
-  }
-  function loadBuyerNumberChoice(){
-    if(document.getElementById('buyerNumberChoiceLoader'))return;
-    const s=document.createElement('script');s.id='buyerNumberChoiceLoader';s.src='./buyer-number-choice.js?v=1&t='+Date.now();document.head.appendChild(s);
-  }
-  function loadBuyerMenuStructure(){
-    if(document.getElementById('buyerMenuStructureLoader'))return;
-    const s=document.createElement('script');s.id='buyerMenuStructureLoader';s.src='./buyer-menu-structure.js?v=1&t='+Date.now();document.head.appendChild(s);
-  }
-  function loadBuyerMenuFix(){
-    if(document.getElementById('buyerMenuFixLoader'))return;
-    const s=document.createElement('script');s.id='buyerMenuFixLoader';s.src='./buyer-menu-fix.js?v=2&t='+Date.now();document.head.appendChild(s);
-  }
+  function showSectionHighlight(view){const sec=document.getElementById(view);const card=sec?.querySelector('.card');if(card)card.classList.add('buyer-section-new')}
+  function clearMenu(view){const btn=document.querySelector(`.sideNav [data-view="${view}"]`);if(!btn)return;btn.classList.remove('buyer-visible-new');btn.querySelector('.buyer-visible-badge')?.remove()}
   function init(){
-    loadBuyerMenuStructure();
-    loadBuyerMenuFix();
-    loadBuyerNumberChoice();
     addStyle();const seen=getSeen();
     Object.entries(FEATURES).forEach(([view,f])=>{
       if(seen[view]===f.version)return;
       markMenu(view);
       const btn=document.querySelector(`.sideNav [data-view="${view}"]`);if(!btn||btn.dataset.visibleNewBound)return;
       btn.dataset.visibleNewBound='1';
-      btn.addEventListener('click',()=>{
-        showSectionHighlight(view);
-        const latest=getSeen();latest[view]=f.version;saveSeen(latest);
-        clearMenu(view);
-      });
+      btn.addEventListener('click',()=>{showSectionHighlight(view);const latest=getSeen();latest[view]=f.version;saveSeen(latest);clearMenu(view)});
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(init,80)},{once:true});else setTimeout(init,80);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,120),{once:true});else setTimeout(init,120);
 })();
