@@ -1,7 +1,7 @@
 (function(){
   const SEEN_KEY='gt27_seller_overview_seen_v1';
-  const RECENT_VERSION='recent-sales-v1';
-  const PENDING_VERSION='pending-payments-v1';
+  const RECENT_VERSION='recent-sales-v2';
+  const PENDING_VERSION='pending-payments-v2';
   let lastSignature='';
 
   function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -27,8 +27,20 @@
     const s=document.createElement('style');s.id='sellerSimpleOverviewStyle';s.textContent=`
       #sellerSalesOverview{margin-top:14px!important}
       #sellerSalesOverview .seller-overview-card{position:relative!important;overflow:hidden!important}
-      #sellerSalesOverview .seller-overview-card.feature-new{border:2px solid #d7a91f!important;background:linear-gradient(135deg,#fffdf7,#fff9df)!important;box-shadow:0 0 0 4px rgba(215,169,31,.12),0 10px 26px rgba(92,69,0,.08)!important}
-      #sellerSalesOverview .new-pill{display:inline-flex;margin-left:7px;padding:3px 7px;border-radius:999px;background:#ee3a16;color:#fff;font-size:9px;font-weight:950;line-height:1;letter-spacing:.06em;vertical-align:middle}
+      #sellerSalesOverview .seller-overview-card.feature-new{
+        border:3px solid #d7a91f!important;
+        background:linear-gradient(135deg,#fffef8 0%,#fff6c9 100%)!important;
+        box-shadow:0 0 0 5px rgba(215,169,31,.18),0 14px 34px rgba(112,82,0,.18)!important;
+        animation:sellerOverviewNewPulse 1.9s ease-in-out infinite!important;
+      }
+      #sellerSalesOverview .seller-overview-card.feature-new:before{
+        content:'NEW FEATURE';position:absolute;top:10px;right:10px;z-index:2;
+        background:#ee3a16;color:#fff;border-radius:999px;padding:6px 10px;
+        font-size:9px;font-weight:950;letter-spacing:.08em;line-height:1;
+        box-shadow:0 5px 12px rgba(238,58,22,.22)
+      }
+      #sellerSalesOverview .seller-overview-card.feature-new h3{padding-right:92px!important}
+      #sellerSalesOverview .new-pill{display:inline-flex;margin-left:7px;padding:4px 8px;border-radius:999px;background:#ee3a16;color:#fff;font-size:9px;font-weight:950;line-height:1;letter-spacing:.06em;vertical-align:middle}
       #sellerSalesOverview .sale-row{padding:11px 0;border-bottom:1px solid #edf2ea}
       #sellerSalesOverview .sale-row:last-child{border-bottom:0}
       #sellerSalesOverview .sale-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -40,7 +52,12 @@
       #sellerSalesOverview .status-pending{background:#fff1d6;color:#8a6111}
       #sellerSalesOverview .pending-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
       #sellerSalesOverview .overview-empty{padding:16px 0;color:#6b7567;font-size:13px}
-      @media(max-width:760px){#sellerSalesOverview .sale-top{flex-direction:column}#sellerSalesOverview .sale-amount{text-align:left}}
+      @keyframes sellerOverviewNewPulse{
+        0%,100%{box-shadow:0 0 0 5px rgba(215,169,31,.18),0 14px 34px rgba(112,82,0,.18)}
+        50%{box-shadow:0 0 0 9px rgba(215,169,31,.10),0 16px 38px rgba(112,82,0,.22)}
+      }
+      @media(prefers-reduced-motion:reduce){#sellerSalesOverview .seller-overview-card.feature-new{animation:none!important}}
+      @media(max-width:760px){#sellerSalesOverview .sale-top{flex-direction:column}#sellerSalesOverview .sale-amount{text-align:left}#sellerSalesOverview .seller-overview-card.feature-new:before{top:8px;right:8px}}
     `;document.head.appendChild(s);
   }
   function markSeen(kind){
