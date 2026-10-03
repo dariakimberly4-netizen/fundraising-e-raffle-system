@@ -1,0 +1,53 @@
+name: Patch Buyer Simple Mobile
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-simple-mobile.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Make buyer mobile navigation directly tappable
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('buyer.html')
+          s=p.read_text()
+          s=s.replace('<script src="./buyer-public-only.js?v=1" defer></script>','<script src="./buyer-public-only.js?v=2" defer></script>',1)
+          if 'buyer-mobile-simple.js?v=1' not in s:
+              s=s.replace('</head>','<script src="./buyer-mobile-simple.js?v=1" defer></script></head>',1)
+          p.write_text(s)
+
+          sw=Path('sw.js')
+          w=sw.read_text()
+          w=w.replace("const CACHE='fundraising-eraffle-v28';","const CACHE='fundraising-eraffle-v29';",1)
+          w=w.replace("'./buyer-public-only.js?v=1'","'./buyer-public-only.js?v=2'",1)
+          if "'./buyer-mobile-simple.js?v=1'" not in w:
+              w=w.replace("'./buyer-public-only.js?v=2',","'./buyer-public-only.js?v=2','./buyer-mobile-simple.js?v=1',",1)
+          marker="url.pathname.endsWith('/buyer-friendly.js')||"
+          if "url.pathname.endsWith('/buyer-mobile-simple.js')||" not in w:
+              w=w.replace(marker,marker+"url.pathname.endsWith('/buyer-mobile-simple.js')||",1)
+          sw.write_text(w)
+          PY
+      - name: Commit buyer mobile fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use one tappable buyer action and simple mobile menu"
+          git push origin HEAD:main
