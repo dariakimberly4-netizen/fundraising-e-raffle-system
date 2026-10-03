@@ -1,0 +1,51 @@
+name: Patch Buyer Profiles
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-profiles.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Add buyer profile loader and offline cache
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          buyer = Path('buyer.html')
+          text = buyer.read_text(encoding='utf-8')
+          marker = '<script src="./buyer-friendly.js?v=1" defer></script>'
+          loader = '<script src="./buyer-profiles.js?v=1"></script>' + marker
+          if 'buyer-profiles.js?v=1' not in text:
+              if marker not in text:
+                  raise SystemExit('buyer-friendly marker not found')
+              text = text.replace(marker, loader, 1)
+              buyer.write_text(text, encoding='utf-8')
+
+          sw = Path('sw.js')
+          s = sw.read_text(encoding='utf-8')
+          s = s.replace("const CACHE='fundraising-eraffle-v22';", "const CACHE='fundraising-eraffle-v23';")
+          if "'./buyer-profiles.js?v=1'" not in s:
+              s = s.replace("'./buyer.html','./buyer-friendly.js?v=1'", "'./buyer.html','./buyer-profiles.js?v=1','./buyer-friendly.js?v=1'")
+          if "url.pathname.endsWith('/buyer-profiles.js')" not in s:
+              needle = "url.pathname.endsWith('/buyer-number-choice.js')||"
+              s = s.replace(needle, "url.pathname.endsWith('/buyer-number-choice.js')||url.pathname.endsWith('/buyer-profiles.js')||", 1)
+          sw.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "Add buyer sign up and profile switching"
+            git push origin main
+          fi
