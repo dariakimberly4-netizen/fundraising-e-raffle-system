@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v12';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-section-highlights.js?v=1','./seller-release.js?v=1','./seller-simple-overview.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v13';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-section-highlights.js?v=1','./seller-release.js?v=1','./seller-simple-overview.js?v=2','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -84,7 +84,7 @@ function injectAppEnhancements(response){
     html=html.replace(/<script src="\.\/seller-feature-highlights\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/seller-release\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/seller-simple-overview\.js(?:\?v=\d+)?" defer><\/script>/g,'');
-    html=html.replace('</head>','<script src="./enhancements.js?v=7" defer></script><script src="./event-branding.js?v=7" defer></script><script src="./seller-feature-highlights.js?v=1" defer></script><script src="./seller-release.js?v=1" defer></script><script src="./seller-simple-overview.js?v=1" defer></script></head>');
+    html=html.replace('</head>','<script src="./enhancements.js?v=7" defer></script><script src="./event-branding.js?v=7" defer></script><script src="./seller-feature-highlights.js?v=1" defer></script><script src="./seller-release.js?v=1" defer></script><script src="./seller-simple-overview.js?v=2" defer></script></head>');
     return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, max-age=0'}});
   });
 }
