@@ -35,11 +35,11 @@
     document.head.appendChild(s);
   }
 
-  function loadBuyerScrollFix(){
-    if(document.getElementById('buyerScrollFixLoader'))return;
+  function loadBuyerMobileSimple(){
+    if(document.getElementById('buyerMobileSimpleLoader'))return;
     const s=document.createElement('script');
-    s.id='buyerScrollFixLoader';
-    s.src='./buyer-scroll-fix.js?v=1';
+    s.id='buyerMobileSimpleLoader';
+    s.src='./buyer-mobile-simple.js?v=1';
     s.defer=true;
     document.head.appendChild(s);
   }
@@ -91,7 +91,7 @@
   }
 
   function init(){
-    addStyle();polishHeader();processNode(document.body);hidePrivateLinks();loadBuyerScrollFix();
+    addStyle();polishHeader();processNode(document.body);hidePrivateLinks();loadBuyerMobileSimple();
     const obs=new MutationObserver(muts=>{
       for(const m of muts){
         m.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3)processNode(n.nodeType===1?n:n.parentElement)});
