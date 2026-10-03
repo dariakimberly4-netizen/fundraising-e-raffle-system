@@ -78,6 +78,8 @@
     const name=tagLabel('name','required','Use the name you want shown on your raffle record.');
     const contact=tagLabel('contact','required','Your seller can use this to confirm your ticket request.');
     const email=tagLabel('email','optional','You can leave this blank.');
+    const referredBy=tagLabel('referredBy','optional','Who invited or referred you to this raffle?');
+    const referralSource=tagLabel('referralSource','optional','Choose where you heard about the raffle.');
     const method=tagLabel('method','required','Choose how you will pay.');
     const preferred=tagLabel('preferredNumbers','optional','Want a lucky number? Enter one or more numbers separated by commas.');
     const ref=tagLabel('ref','optional','Add your payment reference if you already have it.');
@@ -98,7 +100,7 @@
     const detailsWrap=document.createElement('div');detailsWrap.className='grid';[name,contact].forEach(n=>n&&detailsWrap.appendChild(n));
     const ticketNodes=[];if(qtyBlock)ticketNodes.push(qtyBlock);if(summary)ticketNodes.push(summary);
     const paymentWrap=document.createElement('div');paymentWrap.className='grid';[method,ref].forEach(n=>n&&paymentWrap.appendChild(n));
-    const optionalWrap=document.createElement('div');optionalWrap.className='grid';[email,preferred,notes,proof].forEach(n=>n&&optionalWrap.appendChild(n));
+    const optionalWrap=document.createElement('div');optionalWrap.className='grid';[email,referredBy,referralSource,preferred,notes,proof].forEach(n=>n&&optionalWrap.appendChild(n));
 
     form.innerHTML='';
     form.appendChild(section('Your details',1,[detailsWrap]));
