@@ -1,0 +1,91 @@
+name: Patch Buyer No Menu Mobile
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-no-menu.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Simplify buyer mobile experience
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('buyer.html')
+          s=p.read_text()
+
+          # Remove dynamic mobile navigation scripts that have caused touch conflicts.
+          s=re.sub(r'<script src="\.\/buyer-mobile-simple\.js\?v=\d+" defer></script>', '', s)
+          s=re.sub(r'<script src="\.\/buyer-public-only\.js\?v=\d+" defer></script>', '', s)
+
+          # Remove older mobile patch style if this workflow is rerun.
+          s=re.sub(r'<style id="buyerOneActionMobile">.*?</style>\s*', '', s, flags=re.S)
+
+          # Keep only one primary Buy Raffle Ticket action in the introduction.
+          s=re.sub(r'<a class="introBuyNow" href="#buy">.*?</a>', '', s, flags=re.S)
+          intro_actions = '<div class="actions"><a class="btn red" href="#buy">BUY RAFFLE TICKETS</a><a class="btn secondary" href="#request">Check My Request</a></div>'
+          s=s.replace(intro_actions, '<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>', 1)
+
+          css='''<style id="buyerOneActionMobile">
+@media(max-width:780px){
+  html,body{height:auto!important;min-height:100%!important;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;touch-action:auto!important;-webkit-overflow-scrolling:touch!important}
+  body{position:static!important}
+  .app,.shell,main.content{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;touch-action:auto!important}
+  #menuBtn,.nativeBuyerMenu,#sidebar,#overlay,.buyerFixedNav,.buyerSimpleNav{display:none!important;pointer-events:none!important}
+  .topbar{position:sticky!important;top:0!important;z-index:50!important;grid-template-columns:1fr 52px!important;padding:9px 12px!important}
+  .buyerCenterTitle{grid-column:1!important;justify-self:start!important;position:static!important;transform:none!important;font-size:17px!important;text-align:left!important;pointer-events:none!important}
+  .brand{grid-column:2!important;justify-self:end!important}
+  .brand img{width:42px!important;height:42px!important}
+  main.content{display:block!important;padding:14px!important}
+  main.content .view{display:block!important;visibility:visible!important;opacity:1!important;margin:0 0 18px!important;padding:0!important;scroll-margin-top:72px!important}
+  main.content:has(.view:target) .view{display:block!important}
+  main.content .view:target{display:block!important}
+  #introduction .nativeIntroCard{display:none!important}
+  #introduction .hero{padding:22px 18px!important}
+  #introduction .hero h2{font-size:30px!important}
+  #introduction .actions{display:flex!important;justify-content:center!important;margin-top:18px!important}
+  #introduction .actions>*:not(#onlyBuyRaffleTicket){display:none!important}
+  #onlyBuyRaffleTicket{display:flex!important;width:100%!important;min-height:56px!important;align-items:center!important;justify-content:center!important;background:#ee3a16!important;color:#fff!important;border-radius:15px!important;font-size:16px!important;font-weight:950!important;position:relative!important;z-index:20!important;pointer-events:auto!important;touch-action:manipulation!important;text-decoration:none!important}
+  button,a,input,select,textarea,label{pointer-events:auto!important}
+  input,select,textarea,button{touch-action:manipulation!important}
+  #buy{border-top:0!important;padding-top:0!important}
+  #buy .card{margin-top:0!important}
+}
+</style>
+'''
+          s=s.replace('</head>', css+'</head>', 1)
+
+          p.write_text(s)
+
+          sw=Path('sw.js')
+          w=sw.read_text()
+          w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v29';", w, count=1)
+          w=w.replace("'./buyer-public-only.js?v=1',", "")
+          w=w.replace("'./buyer-public-only.js?v=2',", "")
+          w=w.replace("'./buyer-scroll-fix.js?v=1',", "")
+          w=w.replace("'./buyer-mobile-simple.js?v=1',", "")
+          sw.write_text(w)
+          PY
+      - name: Commit buyer mobile simplification
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use one native buy action and remove mobile menu conflicts"
+          git push origin HEAD:main
