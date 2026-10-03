@@ -25,17 +25,22 @@ jobs:
           p=Path('buyer.html')
           s=p.read_text()
 
-          # Remove dynamic mobile navigation scripts that have caused touch conflicts.
           s=re.sub(r'<script src="\.\/buyer-mobile-simple\.js\?v=\d+" defer></script>', '', s)
           s=re.sub(r'<script src="\.\/buyer-public-only\.js\?v=\d+" defer></script>', '', s)
-
-          # Remove older mobile patch style if this workflow is rerun.
           s=re.sub(r'<style id="buyerOneActionMobile">.*?</style>\s*', '', s, flags=re.S)
-
-          # Keep only one primary Buy Raffle Ticket action in the introduction.
           s=re.sub(r'<a class="introBuyNow" href="#buy">.*?</a>', '', s, flags=re.S)
+
           intro_actions = '<div class="actions"><a class="btn red" href="#buy">BUY RAFFLE TICKETS</a><a class="btn secondary" href="#request">Check My Request</a></div>'
-          s=s.replace(intro_actions, '<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>', 1)
+          if intro_actions in s:
+            s=s.replace(intro_actions, '<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>', 1)
+          elif 'id="onlyBuyRaffleTicket"' not in s:
+            marker='<div class="eventLines">'
+            pos=s.find(marker)
+            if pos!=-1:
+              end=s.find('</div>',pos)
+              if end!=-1:
+                end+=6
+                s=s[:end]+'<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>'+s[end:]
 
           css='''<style id="buyerOneActionMobile">
 @media(max-width:780px){
@@ -65,16 +70,13 @@ jobs:
 </style>
 '''
           s=s.replace('</head>', css+'</head>', 1)
-
           p.write_text(s)
 
           sw=Path('sw.js')
           w=sw.read_text()
           w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v29';", w, count=1)
-          w=w.replace("'./buyer-public-only.js?v=1',", "")
-          w=w.replace("'./buyer-public-only.js?v=2',", "")
-          w=w.replace("'./buyer-scroll-fix.js?v=1',", "")
-          w=w.replace("'./buyer-mobile-simple.js?v=1',", "")
+          for asset in ["'./buyer-public-only.js?v=1',","'./buyer-public-only.js?v=2',","'./buyer-scroll-fix.js?v=1',","'./buyer-mobile-simple.js?v=1',"]:
+            w=w.replace(asset,'')
           sw.write_text(w)
           PY
       - name: Commit buyer mobile simplification
