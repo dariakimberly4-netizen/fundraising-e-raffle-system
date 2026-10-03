@@ -1,0 +1,43 @@
+name: Patch Buyer Mobile Header V2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-mobile-header-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Fix buyer mobile header overlap
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text()
+          old='@media(max-width:780px){.buyerPortalLabel{display:none}.buyerCenterTitle{font-size:15px;max-width:48vw;white-space:normal}.menuBtn{display:inline-flex}'
+          new='@media(max-width:780px){.topbar{display:grid;grid-template-columns:92px minmax(0,1fr) 92px;align-items:center;gap:0;padding:9px 12px}.menuBtn{display:inline-flex;grid-column:1;grid-row:1;justify-self:start}.brand{grid-column:3;grid-row:1;justify-self:end;display:flex;align-items:center;justify-content:flex-end;min-width:0;flex:none}.brand img{width:44px;height:44px}.buyerPortalLabel{display:none}.buyerCenterTitle{position:static;grid-column:2;grid-row:1;transform:none;justify-self:center;align-self:center;font-size:15px;max-width:none;white-space:nowrap;text-align:center;line-height:1.05}.menuBtn{display:inline-flex}'
+          if old not in s:
+              raise SystemExit('Expected mobile header marker not found')
+          s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+      - name: Commit buyer header fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Fix buyer mobile header overlap"
+          git push origin HEAD:main
