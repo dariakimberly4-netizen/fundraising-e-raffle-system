@@ -39,19 +39,8 @@
     return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');
   }
 
-  // Preserve the current active buyer's latest global records before anything else runs.
   const startupActive=activeId();
   if(startupActive&&profileById(startupActive))snapshot(startupActive);
-
-  function migrateLegacy(){
-    if(profiles().length)return;
-    const raw=localStorage.getItem(ORDER_KEY)||localStorage.getItem(TICKET_KEY);
-    if(!raw)return;
-    let o=null;try{o=JSON.parse(localStorage.getItem(ORDER_KEY)||'null')}catch(e){}
-    const p={id:uid(),name:(o&&o.buyerName)||'Existing Buyer',contact:(o&&o.contact)||'',email:(o&&o.email)||'',createdAt:new Date().toISOString(),migrated:true};
-    saveProfiles([p]);snapshot(p.id);
-  }
-  migrateLegacy();
 
   function addStyle(){
     if(document.getElementById(STYLE_ID))return;
@@ -63,8 +52,8 @@
       .bp-kicker{text-align:center;color:#246b2d;font-weight:950;font-size:11px;letter-spacing:.1em;text-transform:uppercase}.bp-title{text-align:center;font-family:Georgia,'Times New Roman',serif;color:#246b2d;font-size:30px;margin:6px 0}.bp-sub{text-align:center;color:#657260;font-size:13px;line-height:1.5;margin:0 auto 18px;max-width:470px}
       .bp-list{display:grid;gap:9px;margin:12px 0 18px}.bp-person{display:flex;align-items:center;gap:12px;width:100%;border:1px solid #dfe8d9;background:#f7faf5;border-radius:16px;padding:13px 14px;cursor:pointer;text-align:left}.bp-person:hover{border-color:#78a91f}.bp-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#246b2d;color:#fff;font-weight:950;font-size:18px;flex:0 0 42px}.bp-person b{display:block;color:#246b2d;font-size:15px}.bp-person span{display:block;color:#6b7567;font-size:11px;margin-top:2px}.bp-open{margin-left:auto;color:#246b2d;font-weight:950;font-size:12px}
       .bp-new{border-top:1px solid #edf2ea;padding-top:17px}.bp-new h3{margin:0 0 4px;color:#246b2d;font-family:Georgia,'Times New Roman',serif}.bp-note{color:#6b7567;font-size:12px;line-height:1.45;margin:0 0 12px}.bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bp-field{display:grid;gap:5px;color:#40523d;font-size:12px;font-weight:850}.bp-field.full{grid-column:1/-1}.bp-field input{width:100%;border:1px solid #d6e2d0;border-radius:13px;padding:12px 13px;font-size:16px;outline:none}.bp-field input:focus{border-color:#246b2d;box-shadow:0 0 0 3px rgba(36,107,45,.1)}
-      .bp-create{margin-top:12px;width:100%;min-height:50px;border:0;border-radius:14px;background:#246b2d;color:#fff;font-weight:950;font-size:15px;cursor:pointer}.bp-error{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff1ef;color:#a52d20;font-size:12px;font-weight:800}.bp-error.show{display:block}
-      .bp-current{margin:0 0 12px;padding:11px 12px;border:1px solid #dfe8d9;background:#f7faf5;border-radius:14px}.bp-current small{display:block;color:#6b7567;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.bp-current b{display:block;color:#246b2d;margin-top:3px;font-size:14px}.bp-switch{width:100%;margin-top:8px;min-height:38px;border:1px solid #cfe0c7;background:#fff;color:#246b2d;border-radius:11px;font-weight:900;cursor:pointer}
+      .bp-create{margin-top:12px;width:100%;min-height:50px;border:0;border-radius:14px;background:#246b2d;color:#fff;font-weight:950;font-size:15px;cursor:pointer}.bp-skip{margin-top:9px;width:100%;min-height:44px;border:1px solid #d6e2d0;border-radius:14px;background:#fff;color:#246b2d;font-weight:900;cursor:pointer}.bp-error{display:none;margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff1ef;color:#a52d20;font-size:12px;font-weight:800}.bp-error.show{display:block}
+      .bp-current,.bp-optional{margin:0 0 12px;padding:11px 12px;border:1px solid #dfe8d9;background:#f7faf5;border-radius:14px}.bp-current small,.bp-optional small{display:block;color:#6b7567;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.bp-current b,.bp-optional b{display:block;color:#246b2d;margin-top:3px;font-size:14px}.bp-switch{width:100%;margin-top:8px;min-height:38px;border:1px solid #cfe0c7;background:#fff;color:#246b2d;border-radius:11px;font-weight:900;cursor:pointer}
       @media(max-width:560px){.bp-cover{padding:10px;align-items:flex-start}.bp-card{margin-top:8px;border-radius:22px}.bp-body{padding:19px 16px 20px}.bp-title{font-size:27px}.bp-grid{grid-template-columns:1fr}.bp-field.full{grid-column:auto}.bp-person{padding:12px}.bp-logo{width:70px;height:70px}}
     `;document.head.appendChild(s);
   }
@@ -92,33 +81,41 @@
 
   function chooser(){
     addStyle();
+    if(document.getElementById('buyerProfileChooser'))return;
     const cover=document.createElement('div');cover.className='bp-cover';cover.id='buyerProfileChooser';
     const list=profiles();
-    cover.innerHTML=`<section class="bp-card"><div class="bp-stripe"></div><div class="bp-body"><img class="bp-logo" src="./assets/pd-warriors-logo.jpg" alt="Parkinson's Disease Warriors Philippines logo"><div class="bp-kicker">GET TOGETHER 2027 • Buyer Portal</div><h1 class="bp-title">Who is buying tickets?</h1><p class="bp-sub">Choose your buyer profile so each person keeps their own requests, Control Nos. and e-tickets on this phone.</p><div class="bp-list">${list.map(p=>`<button class="bp-person" type="button" data-profile="${safe(p.id)}"><span class="bp-avatar">${safe((p.name||'?').trim().charAt(0).toUpperCase())}</span><span><b>${safe(p.name)}</b><span>${safe(p.contact||'No contact')} ${p.pinHash?'• PIN protected':''}</span></span><span class="bp-open">OPEN ›</span></button>`).join('')||'<div class="bp-note" style="text-align:center;padding:8px">No buyer profiles yet. Create the first one below.</div>'}</div><form class="bp-new" id="buyerProfileForm"><h3>Create Buyer Profile</h3><p class="bp-note">Quick sign up. This profile stays on this device and works offline.</p><div class="bp-grid"><label class="bp-field"><span>Full Name *</span><input name="name" autocomplete="name" required placeholder="Buyer name"></label><label class="bp-field"><span>Mobile / Contact *</span><input name="contact" autocomplete="tel" required placeholder="09xx xxx xxxx"></label><label class="bp-field"><span>Email — Optional</span><input name="email" type="email" autocomplete="email" placeholder="name@example.com"></label><label class="bp-field"><span>4-digit PIN — Optional</span><input name="pin" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••"></label></div><button class="bp-create" type="submit">CREATE PROFILE & CONTINUE</button><div class="bp-error" id="buyerProfileError"></div></form></div></section>`;
+    cover.innerHTML=`<section class="bp-card"><div class="bp-stripe"></div><div class="bp-body"><img class="bp-logo" src="./assets/pd-warriors-logo.jpg" alt="Parkinson's Disease Warriors Philippines logo"><div class="bp-kicker">GET TOGETHER 2027 • Optional Saved Buyers</div><h1 class="bp-title">Saved buyer profiles</h1><p class="bp-sub">Profiles are optional. Use one only if several people share this phone and want their raffle records kept separately.</p><div class="bp-list">${list.map(p=>`<button class="bp-person" type="button" data-profile="${safe(p.id)}"><span class="bp-avatar">${safe((p.name||'?').trim().charAt(0).toUpperCase())}</span><span><b>${safe(p.name)}</b><span>${safe(p.contact||'No contact')} ${p.pinHash?'• PIN protected':''}</span></span><span class="bp-open">OPEN ›</span></button>`).join('')||'<div class="bp-note" style="text-align:center;padding:8px">No saved buyer profiles yet. You can continue buying without one.</div>'}</div><form class="bp-new" id="buyerProfileForm"><h3>Save a Buyer Profile — Optional</h3><p class="bp-note">This is only for convenience on a shared device. It is not required to buy raffle tickets.</p><div class="bp-grid"><label class="bp-field"><span>Full Name *</span><input name="name" autocomplete="name" required placeholder="Buyer name"></label><label class="bp-field"><span>Mobile / Contact *</span><input name="contact" autocomplete="tel" required placeholder="09xx xxx xxxx"></label><label class="bp-field"><span>Email — Optional</span><input name="email" type="email" autocomplete="email" placeholder="name@example.com"></label><label class="bp-field"><span>4-digit PIN — Optional</span><input name="pin" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••"></label></div><button class="bp-create" type="submit">SAVE PROFILE & CONTINUE</button><button class="bp-skip" type="button" id="buyerProfileSkip">CONTINUE WITHOUT PROFILE</button><div class="bp-error" id="buyerProfileError"></div></form></div></section>`;
     document.body.appendChild(cover);
     cover.querySelectorAll('[data-profile]').forEach(b=>b.addEventListener('click',()=>selectProfile(b.dataset.profile)));
     const form=cover.querySelector('#buyerProfileForm'),err=cover.querySelector('#buyerProfileError');form.addEventListener('submit',e=>{e.preventDefault();err.classList.remove('show');createProfile(form,err)});
+    cover.querySelector('#buyerProfileSkip').onclick=()=>cover.remove();
   }
 
   function installCurrentBuyerCard(){
     const id=activeId(),p=profileById(id);if(!p)return;
     const side=document.querySelector('.sidebar');if(side&&!document.getElementById('buyerCurrentProfile')){
-      const card=document.createElement('div');card.className='bp-current';card.id='buyerCurrentProfile';card.innerHTML=`<small>Current Buyer</small><b>${safe(p.name)}</b><button class="bp-switch" type="button">Switch Buyer</button>`;
+      const card=document.createElement('div');card.className='bp-current';card.id='buyerCurrentProfile';card.innerHTML=`<small>Saved Buyer — Optional</small><b>${safe(p.name)}</b><button class="bp-switch" type="button">Switch / Exit Saved Buyer</button>`;
       const title=side.querySelector('.sideTitle');title?.insertAdjacentElement('afterend',card);if(!title)side.prepend(card);
       card.querySelector('.bp-switch').onclick=()=>{snapshot(id);localStorage.removeItem(ACTIVE_KEY);location.reload()};
     }
-    // Friendly prefill for a new request.
     setTimeout(()=>{
       const n=document.getElementById('name'),c=document.getElementById('contact'),e=document.getElementById('email');
       if(n&&!n.value)n.value=p.name||'';if(c&&!c.value)c.value=p.contact||'';if(e&&!e.value)e.value=p.email||'';
     },60);
   }
 
+  function installOptionalProfilesButton(){
+    const side=document.querySelector('.sidebar');if(!side||document.getElementById('buyerOptionalProfiles'))return;
+    const card=document.createElement('div');card.className='bp-optional';card.id='buyerOptionalProfiles';card.innerHTML=`<small>Optional</small><b>Saved Buyers</b><button class="bp-switch" type="button">Use / Create Saved Buyer</button>`;
+    const title=side.querySelector('.sideTitle');title?.insertAdjacentElement('afterend',card);if(!title)side.prepend(card);
+    card.querySelector('.bp-switch').onclick=chooser;
+  }
+
   window.addEventListener('beforeunload',()=>{const id=activeId();if(id&&profileById(id))snapshot(id)});
   document.addEventListener('DOMContentLoaded',()=>{
     addStyle();
     const id=activeId();
-    if(!id||!profileById(id)){chooser();return}
-    installCurrentBuyerCard();
+    if(id&&profileById(id))installCurrentBuyerCard();
+    else installOptionalProfilesButton();
   },{once:true});
 })();
