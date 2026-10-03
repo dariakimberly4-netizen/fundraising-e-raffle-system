@@ -1,0 +1,58 @@
+name: Fix Buyer Referral Fields
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-buyer-referral-click.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Keep referral fields interactive in friendly buyer form
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('buyer-friendly.js')
+          s=p.read_text()
+          anchor="    const email=tagLabel('email','optional','You can leave this blank.');\n    const method=tagLabel('method','required','Choose how you will pay.');"
+          replacement="    const email=tagLabel('email','optional','You can leave this blank.');\n    const referredBy=tagLabel('referredBy','optional','Who invited or referred you to this raffle?');\n    const referralSource=tagLabel('referralSource','optional','Choose where you heard about the raffle.');\n    const method=tagLabel('method','required','Choose how you will pay.');"
+          if "const referredBy=tagLabel('referredBy'" not in s:
+              if anchor not in s:
+                  raise SystemExit('buyer-friendly referral variable anchor not found')
+              s=s.replace(anchor,replacement,1)
+
+          old="    const optionalWrap=document.createElement('div');optionalWrap.className='grid';[email,preferred,notes,proof].forEach(n=>n&&optionalWrap.appendChild(n));"
+          new="    const optionalWrap=document.createElement('div');optionalWrap.className='grid';[email,referredBy,referralSource,preferred,notes,proof].forEach(n=>n&&optionalWrap.appendChild(n));"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif "[email,referredBy,referralSource,preferred,notes,proof]" not in s:
+              raise SystemExit('buyer-friendly optional wrap anchor not found')
+          p.write_text(s)
+
+          p=Path('buyer.html')
+          s=p.read_text().replace('./buyer-friendly.js?v=1','./buyer-friendly.js?v=2')
+          p.write_text(s)
+
+          p=Path('sw.js')
+          s=p.read_text()
+          s=s.replace("const CACHE='fundraising-eraffle-v24'","const CACHE='fundraising-eraffle-v25'")
+          s=s.replace("'./buyer-friendly.js?v=1'","'./buyer-friendly.js?v=2'")
+          p.write_text(s)
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer-friendly.js buyer.html sw.js
+          git diff --cached --quiet || git commit -m "Fix clickable buyer referral fields"
+          git push
