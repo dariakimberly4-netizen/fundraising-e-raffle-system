@@ -1,0 +1,57 @@
+name: Patch Seller Intro Heading
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-seller-intro-heading.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Center and enlarge seller intro heading
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('event-branding.js')
+          s=p.read_text()
+
+          old_css="#dashboard .hero .eyebrow{color:var(--pd-green)!important;font-weight:900!important}"
+          new_css="#dashboard .hero .eyebrow{display:block!important;width:100%!important;text-align:center!important;color:var(--pd-green)!important;font-weight:950!important;font-size:13px!important;line-height:1.4!important;letter-spacing:.12em!important;margin-bottom:10px!important}"
+          if old_css not in s:
+              raise SystemExit('Expected seller eyebrow CSS marker not found')
+          s=s.replace(old_css,new_css,1)
+
+          old_text="if(eyebrow)eyebrow.textContent=`${EVENT.org} • Fundraising`;"
+          new_text="if(eyebrow)eyebrow.textContent=`${EVENT.org} • ${EVENT.subtitle}`;"
+          if old_text not in s:
+              raise SystemExit('Expected seller eyebrow text marker not found')
+          s=s.replace(old_text,new_text,1)
+
+          mobile="@media(max-width:900px){\n    header{z-index:90!important}"
+          mobile_new="@media(max-width:900px){\n    #dashboard .hero .eyebrow{font-size:12px!important;text-align:center!important;line-height:1.45!important}\n    header{z-index:90!important}"
+          if mobile not in s:
+              raise SystemExit('Expected seller mobile media marker not found')
+          s=s.replace(mobile,mobile_new,1)
+
+          p.write_text(s)
+          PY
+      - name: Commit seller intro heading update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add event-branding.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Center and enlarge seller intro heading"
+          git push origin HEAD:main
