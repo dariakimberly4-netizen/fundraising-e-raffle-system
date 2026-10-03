@@ -49,7 +49,7 @@
     let b=document.getElementById('sellerForceTopBanner');
     if(!b){
       b=document.createElement('div');b.id='sellerForceTopBanner';
-      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Winner Claim Tracking • Date-Range Report • Quick Backup • Sale Notes • Restore Voided Sale • Draw Lock • Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Pending Counter • Seller Activity Log • End-of-Day Report • Void Sale • Void Ticket • Resend Release Code</small>';
+      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Control Numbers • Winner Claim Tracking • Date-Range Report • Quick Backup • Sale Notes • Restore Voided Sale • Draw Lock • Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Pending Counter • Seller Activity Log • End-of-Day Report • Void Sale • Void Ticket • Resend Release Code</small>';
       const hero=dashboard.querySelector('.hero');if(hero)dashboard.insertBefore(b,hero);else dashboard.insertBefore(b,dashboard.firstChild);
     }
   }
@@ -75,6 +75,7 @@
   function loadSellerTools(){
     loadScript('sellerOpsToolsLoader','./seller-ops-tools.js');
     loadScript('sellerFinalToolsLoader','./seller-final-tools.js');
+    loadScript('sellerControlNumberLoader','./seller-control-number.js');
   }
   function init(){
     loadSellerTools();apply();setTimeout(apply,200);setTimeout(apply,600);setTimeout(apply,1200);
