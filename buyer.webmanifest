@@ -1,0 +1,36 @@
+{
+  "name": "GET TOGETHER 2027 — Buyer Portal",
+  "short_name": "GT2027 Raffle",
+  "id": "./buyer.html",
+  "start_url": "./buyer.html#introduction",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffdf7",
+  "theme_color": "#246b2d",
+  "description": "Offline-ready fundraising e-raffle buyer portal for GET TOGETHER 2027.",
+  "icons": [
+    {
+      "src": "./assets/pd-warriors-logo.jpg?v=7",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buy Tickets",
+      "short_name": "Buy",
+      "url": "./buyer.html#buy"
+    },
+    {
+      "name": "My E-Tickets",
+      "short_name": "My Tickets",
+      "url": "./buyer.html#tickets"
+    },
+    {
+      "name": "My Request",
+      "short_name": "Request",
+      "url": "./buyer.html#request"
+    }
+  ]
+}
