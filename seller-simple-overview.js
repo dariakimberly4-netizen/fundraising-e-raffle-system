@@ -1,8 +1,12 @@
 (function(){
   const SEEN_KEY='gt27_seller_overview_seen_v1';
+  const ACTION_KEY='gt27_seller_action_seen_v2';
   const RECENT_VERSION='recent-sales-v3';
   const PENDING_VERSION='pending-payments-v3';
   const TODAY_VERSION='today-summary-v1';
+  const RESEND_VERSION='resend-release-v2';
+  const VOIDSALE_VERSION='void-sale-v2';
+  const VOIDTICKET_VERSION='void-ticket-v2';
   const PREFIX='ERTKT1.';
   let lastSignature='';
 
@@ -10,6 +14,8 @@
   function peso(n){return '₱'+Number(n||0).toLocaleString('en-PH',{maximumFractionDigits:2})}
   function seen(){try{return JSON.parse(localStorage.getItem(SEEN_KEY)||'{}')||{}}catch(e){return{}}}
   function saveSeen(x){try{localStorage.setItem(SEEN_KEY,JSON.stringify(x))}catch(e){}}
+  function actionSeen(){try{return JSON.parse(localStorage.getItem(ACTION_KEY)||'{}')||{}}catch(e){return{}}}
+  function saveActionSeen(x){try{localStorage.setItem(ACTION_KEY,JSON.stringify(x))}catch(e){}}
   function fmtDate(v){if(!v)return '';const d=new Date(v);if(Number.isNaN(d.getTime()))return '';return d.toLocaleString('en-PH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
   function isToday(v){if(!v)return false;const d=new Date(v),n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate()}
   function sales(){try{return (typeof db!=='undefined'&&Array.isArray(db.sales))?db.sales:[]}catch(e){return[]}}
@@ -45,17 +51,38 @@
       #sellerSalesOverview .sale-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
       #sellerSalesOverview .btn.danger{background:#fff0f1!important;color:#a33038!important;border:1px solid #f1c7cb!important}
       #sellerSalesOverview .overview-empty{padding:16px 0;color:#6b7567;font-size:13px}
+      .seller-action-new{position:relative!important;border:2px solid #d7a91f!important;box-shadow:0 0 0 4px rgba(215,169,31,.18),0 7px 18px rgba(105,77,0,.14)!important;padding-right:52px!important;animation:sellerActionPulse 1.8s ease-in-out infinite!important}
+      .seller-action-new:after{content:'NEW';position:absolute;right:7px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;padding:4px 7px;border-radius:999px;background:#ee3a16;color:#fff;font-size:8px;font-weight:950;letter-spacing:.06em;line-height:1}
+      #ticketList button.seller-action-new{background:#fff7db!important;color:#7a5700!important}
+      @keyframes sellerActionPulse{0%,100%{box-shadow:0 0 0 4px rgba(215,169,31,.18),0 7px 18px rgba(105,77,0,.14)}50%{box-shadow:0 0 0 8px rgba(215,169,31,.09),0 9px 22px rgba(105,77,0,.18)}}
+      @media(prefers-reduced-motion:reduce){.seller-action-new{animation:none!important}}
       @media(max-width:760px){#sellerTodaySummary .today-grid{grid-template-columns:1fr 1fr}#sellerSalesOverview .sale-top{flex-direction:column}#sellerSalesOverview .sale-amount{text-align:left}}
     `;document.head.appendChild(s);
   }
 
   function markSeen(kind){const x=seen();if(kind==='recent')x.recent=RECENT_VERSION;if(kind==='pending')x.pending=PENDING_VERSION;if(kind==='today')x.today=TODAY_VERSION;saveSeen(x);applyHighlights()}
+  function markActionSeen(kind){
+    const x=actionSeen();
+    if(kind==='resend')x.resend=RESEND_VERSION;
+    if(kind==='voidsale')x.voidsale=VOIDSALE_VERSION;
+    if(kind==='voidticket')x.voidticket=VOIDTICKET_VERSION;
+    saveActionSeen(x);applyActionHighlights();
+  }
   function applyHighlights(){
     const x=seen();
     const today=document.getElementById('sellerTodaySummary'),recent=document.getElementById('sellerRecentSalesCard'),pending=document.getElementById('sellerPendingPaymentsCard');
     if(today)today.classList.toggle('feature-new',x.today!==TODAY_VERSION);
     if(recent)recent.classList.toggle('feature-new',x.recent!==RECENT_VERSION);
     if(pending)pending.classList.toggle('feature-new',x.pending!==PENDING_VERSION);
+  }
+  function applyActionHighlights(){
+    const x=actionSeen();
+    document.querySelectorAll('[data-resend-release]').forEach(b=>b.classList.toggle('seller-action-new',x.resend!==RESEND_VERSION));
+    document.querySelectorAll('[data-void-sale]').forEach(b=>b.classList.toggle('seller-action-new',x.voidsale!==VOIDSALE_VERSION));
+    document.querySelectorAll('#ticketList button[onclick^="voidTicket("]').forEach(b=>{
+      b.classList.toggle('seller-action-new',x.voidticket!==VOIDTICKET_VERSION);
+      if(!b.dataset.voidTicketHighlightBound){b.dataset.voidTicketHighlightBound='1';b.addEventListener('click',()=>markActionSeen('voidticket'),{once:true})}
+    });
   }
 
   function ensureShell(){
@@ -86,6 +113,7 @@
   async function resendRelease(id){
     const s=sales().find(x=>String(x.id)===String(id));const code=releaseCode(s);
     if(!code){toastMsg('Mark the sale Paid first.');return}
+    markActionSeen('resend');
     const text=`GET TOGETHER 2027 Buyer Ticket Release Code\n\n${code}`;
     try{if(navigator.share)await navigator.share({title:'GET TOGETHER 2027 Ticket Release',text});else{await navigator.clipboard.writeText(code);toastMsg('Ticket Release Code copied for resend.')}}catch(e){try{await navigator.clipboard.writeText(code);toastMsg('Ticket Release Code copied for resend.')}catch(x){prompt('Copy Ticket Release Code:',code)}}
     markSeen('recent');
@@ -93,6 +121,7 @@
   function voidSale(id){
     const s=sales().find(x=>String(x.id)===String(id));if(!s)return;
     if(!confirm(`Void the sale for ${s.buyerName||'this buyer'} and all linked tickets?`))return;
+    markActionSeen('voidsale');
     s.voided=true;ticketsFor(s.id).forEach(t=>{t.voided=true});
     try{localStorage.setItem('fundraising_eraffle_v1',JSON.stringify(db));if(typeof renderAll==='function')renderAll()}catch(e){}
     lastSignature='';render();toastMsg('Sale and linked tickets voided.');markSeen('recent');
@@ -144,8 +173,8 @@
       if(pendingBox)pendingBox.innerHTML=pending.length?pending.slice(0,6).map(s=>row(s,'pending')).join(''):'<div class="overview-empty">No pending payments.</div>';
       bindActions();
     }
-    applyHighlights();
+    applyHighlights();applyActionHighlights();
   }
-  function init(){render();setTimeout(render,350);setTimeout(render,900);setInterval(render,2500);document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastSignature='';render()}})}
+  function init(){render();setTimeout(render,350);setTimeout(render,900);setInterval(render,1800);const ticketRoot=document.getElementById('tickets')||document.body;new MutationObserver(()=>applyActionHighlights()).observe(ticketRoot,{childList:true,subtree:true});document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastSignature='';render()}})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
