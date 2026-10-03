@@ -32,7 +32,12 @@
     const btn=document.querySelector(`.sideNav [data-view="${view}"]`);if(!btn)return;
     btn.classList.remove('buyer-visible-new');btn.querySelector('.buyer-visible-badge')?.remove();
   }
+  function loadBuyerNumberChoice(){
+    if(document.getElementById('buyerNumberChoiceLoader'))return;
+    const s=document.createElement('script');s.id='buyerNumberChoiceLoader';s.src='./buyer-number-choice.js?v=1&t='+Date.now();document.head.appendChild(s);
+  }
   function init(){
+    loadBuyerNumberChoice();
     addStyle();const seen=getSeen();
     Object.entries(FEATURES).forEach(([view,f])=>{
       if(seen[view]===f.version)return;
