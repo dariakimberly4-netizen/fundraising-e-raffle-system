@@ -1,0 +1,53 @@
+name: Patch Buyer Centered Title
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-centered-title.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Center Fundraising E-Raffle only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text()
+          old='.brand small{display:block;color:var(--green);font-weight:850;font-size:14px}.menuBtn'
+          new='.brand small{display:block;color:var(--green);font-weight:850;font-size:14px}.buyerCenterTitle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:505;color:var(--green);font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:900;line-height:1.05;text-align:center;white-space:nowrap;pointer-events:none}.buyerPortalLabel{color:var(--green);font-weight:850;font-size:12px;white-space:nowrap}.menuBtn'
+          if old not in s:
+              raise SystemExit('Expected buyer header CSS marker not found')
+          s=s.replace(old,new,1)
+          old_header='<div class="brand"><img src="./assets/pd-warriors-logo.jpg" alt="Parkinson\'s Disease Warriors Philippines logo"><div><small>Fundraising E‑Raffle • Buyer Portal</small></div></div>'
+          new_header='<div class="brand"><img src="./assets/pd-warriors-logo.jpg" alt="Parkinson\'s Disease Warriors Philippines logo"><span class="buyerPortalLabel">Buyer Portal</span></div><div class="buyerCenterTitle">Fundraising E‑Raffle</div>'
+          if old_header not in s:
+              raise SystemExit('Expected buyer header HTML marker not found')
+          s=s.replace(old_header,new_header,1)
+          media='@media(max-width:780px){.menuBtn{display:inline-flex}'
+          media_new='@media(max-width:780px){.buyerPortalLabel{display:none}.buyerCenterTitle{font-size:15px;max-width:48vw;white-space:normal}.menuBtn{display:inline-flex}'
+          if media not in s:
+              raise SystemExit('Expected mobile media marker not found')
+          s=s.replace(media,media_new,1)
+          p.write_text(s)
+          PY
+      - name: Commit buyer header update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Center Fundraising E-Raffle in buyer header"
+          git push origin HEAD:main
