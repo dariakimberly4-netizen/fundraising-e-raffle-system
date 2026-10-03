@@ -1,4 +1,4 @@
-name: Patch Buyer No Menu Mobile
+name: Patch Buyer Introduction First
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-      - name: Simplify buyer mobile experience
+      - name: Keep introduction first
         shell: bash
         run: |
           python - <<'PY'
@@ -25,61 +25,32 @@ jobs:
           p=Path('buyer.html')
           s=p.read_text()
 
-          s=re.sub(r'<script src="\.\/buyer-mobile-simple\.js\?v=\d+" defer></script>', '', s)
-          s=re.sub(r'<script src="\.\/buyer-public-only\.js\?v=\d+" defer></script>', '', s)
-          s=re.sub(r'<style id="buyerOneActionMobile">.*?</style>\s*', '', s, flags=re.S)
-          s=re.sub(r'<a class="introBuyNow" href="#buy">.*?</a>', '', s, flags=re.S)
-
-          intro_actions = '<div class="actions"><a class="btn red" href="#buy">BUY RAFFLE TICKETS</a><a class="btn secondary" href="#request">Check My Request</a></div>'
-          if intro_actions in s:
-            s=s.replace(intro_actions, '<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>', 1)
-          elif 'id="onlyBuyRaffleTicket"' not in s:
-            marker='<div class="eventLines">'
-            pos=s.find(marker)
-            if pos!=-1:
-              end=s.find('</div>',pos)
-              if end!=-1:
-                end+=6
-                s=s[:end]+'<div class="actions"><a id="onlyBuyRaffleTicket" class="btn red" href="#buy">BUY RAFFLE TICKET</a></div>'+s[end:]
-
-          css='''<style id="buyerOneActionMobile">
-@media(max-width:780px){
-  html,body{height:auto!important;min-height:100%!important;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;touch-action:auto!important;-webkit-overflow-scrolling:touch!important}
-  body{position:static!important}
-  .app,.shell,main.content{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;touch-action:auto!important}
-  #menuBtn,.nativeBuyerMenu,#sidebar,#overlay,.buyerFixedNav,.buyerSimpleNav{display:none!important;pointer-events:none!important}
-  .topbar{position:sticky!important;top:0!important;z-index:50!important;grid-template-columns:1fr 52px!important;padding:9px 12px!important}
-  .buyerCenterTitle{grid-column:1!important;justify-self:start!important;position:static!important;transform:none!important;font-size:17px!important;text-align:left!important;pointer-events:none!important}
-  .brand{grid-column:2!important;justify-self:end!important}
-  .brand img{width:42px!important;height:42px!important}
-  main.content{display:block!important;padding:14px!important}
-  main.content .view{display:block!important;visibility:visible!important;opacity:1!important;margin:0 0 18px!important;padding:0!important;scroll-margin-top:72px!important}
-  main.content:has(.view:target) .view{display:block!important}
-  main.content .view:target{display:block!important}
-  #introduction .nativeIntroCard{display:none!important}
-  #introduction .hero{padding:22px 18px!important}
-  #introduction .hero h2{font-size:30px!important}
-  #introduction .actions{display:flex!important;justify-content:center!important;margin-top:18px!important}
-  #introduction .actions>*:not(#onlyBuyRaffleTicket){display:none!important}
-  #onlyBuyRaffleTicket{display:flex!important;width:100%!important;min-height:56px!important;align-items:center!important;justify-content:center!important;background:#ee3a16!important;color:#fff!important;border-radius:15px!important;font-size:16px!important;font-weight:950!important;position:relative!important;z-index:20!important;pointer-events:auto!important;touch-action:manipulation!important;text-decoration:none!important}
-  button,a,input,select,textarea,label{pointer-events:auto!important}
-  input,select,textarea,button{touch-action:manipulation!important}
-  #buy{border-top:0!important;padding-top:0!important}
-  #buy .card{margin-top:0!important}
-}
-</style>
+          s=re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
+          script='''<script id="buyerIntroFirst">
+(function(){
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  function openAtIntroduction(){
+    if(location.hash && location.hash !== '#introduction'){
+      try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    }
+    window.scrollTo({top:0,left:0,behavior:'auto'});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',openAtIntroduction,{once:true});
+  else openAtIntroduction();
+  window.addEventListener('load',()=>setTimeout(openAtIntroduction,0),{once:true});
+})();
+</script>
 '''
-          s=s.replace('</head>', css+'</head>', 1)
+          s=s.replace('</head>', script+'</head>', 1)
           p.write_text(s)
 
           sw=Path('sw.js')
-          w=sw.read_text()
-          w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v29';", w, count=1)
-          for asset in ["'./buyer-public-only.js?v=1',","'./buyer-public-only.js?v=2',","'./buyer-scroll-fix.js?v=1',","'./buyer-mobile-simple.js?v=1',"]:
-            w=w.replace(asset,'')
-          sw.write_text(w)
+          if sw.exists():
+            w=sw.read_text()
+            w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v30';", w, count=1)
+            sw.write_text(w)
           PY
-      - name: Commit buyer mobile simplification
+      - name: Commit introduction-first behavior
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -89,5 +60,5 @@ jobs:
             echo "No changes to commit"
             exit 0
           fi
-          git commit -m "Use one native buy action and remove mobile menu conflicts"
+          git commit -m "Open buyer portal at introduction first"
           git push origin HEAD:main
