@@ -35,6 +35,15 @@
     document.head.appendChild(s);
   }
 
+  function loadMenuFailsafe(){
+    if(document.getElementById('buyerMenuFailsafeLoader'))return;
+    const s=document.createElement('script');
+    s.id='buyerMenuFailsafeLoader';
+    s.src='./buyer-menu-failsafe.js?v=1';
+    s.defer=true;
+    document.head.appendChild(s);
+  }
+
   function hidePrivateLinks(root=document){
     root.querySelectorAll?.('a[href]').forEach(a=>{
       const href=(a.getAttribute('href')||'').toLowerCase();
@@ -82,7 +91,7 @@
   }
 
   function init(){
-    addStyle();polishHeader();processNode(document.body);hidePrivateLinks();
+    addStyle();polishHeader();processNode(document.body);hidePrivateLinks();loadMenuFailsafe();
     const obs=new MutationObserver(muts=>{
       for(const m of muts){
         m.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3)processNode(n.nodeType===1?n:n.parentElement)});
