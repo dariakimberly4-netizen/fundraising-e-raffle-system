@@ -36,7 +36,7 @@
     let b=document.getElementById('sellerForceTopBanner');
     if(!b){
       b=document.createElement('div');b.id='sellerForceTopBanner';
-      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Void Sale • Void Ticket • Resend Release Code</small>';
+      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Pending Counter • Seller Activity Log • End-of-Day Report • Void Sale • Void Ticket • Resend Release Code</small>';
       const hero=dashboard.querySelector('.hero');if(hero)dashboard.insertBefore(b,hero);else dashboard.insertBefore(b,dashboard.firstChild);
     }
   }
@@ -52,9 +52,14 @@
     badge(document.querySelector('#nav button[data-view="dashboard"]'),'NEW');
     badge(document.querySelector('#nav button[data-view="sell"]'),'NEW');
     badge(document.querySelector('#nav button[data-view="tickets"]'),'NEW');
+    badge(document.querySelector('#nav button[data-view="reports"]'),'NEW');
+  }
+  function loadOps(){
+    if(document.getElementById('sellerOpsToolsLoader'))return;
+    const s=document.createElement('script');s.id='sellerOpsToolsLoader';s.src='./seller-ops-tools.js?v=1&t='+Date.now();document.head.appendChild(s);
   }
   function init(){
-    apply();setTimeout(apply,200);setTimeout(apply,600);setTimeout(apply,1200);
+    loadOps();apply();setTimeout(apply,200);setTimeout(apply,600);setTimeout(apply,1200);
     new MutationObserver(apply).observe(document.body,{childList:true,subtree:true});
     setInterval(apply,1200);
   }
