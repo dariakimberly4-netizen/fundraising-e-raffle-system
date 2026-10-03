@@ -28,7 +28,7 @@
   #dashboard .hero{background:#fff!important;color:#24311f!important;border:2px solid var(--pd-green)!important;box-shadow:0 12px 32px rgba(36,107,45,.10)!important;position:relative!important}
   #dashboard .hero:before{content:"";position:absolute;left:-2px;right:-2px;top:-2px;height:7px;border-radius:28px 28px 0 0;background:linear-gradient(90deg,var(--pd-green),var(--pd-leaf) 32%,var(--pd-gold) 64%,var(--pd-red));z-index:1}
   #dashboard .hero:after{content:"";position:absolute;right:-70px;bottom:-86px;width:220px;height:220px;border-radius:50%;border:3px solid rgba(238,58,22,.10)!important;box-shadow:0 0 0 18px rgba(120,169,31,.06),0 0 0 36px rgba(215,169,31,.045)!important}
-  #dashboard .hero .eyebrow{color:var(--pd-green)!important;font-weight:900!important}
+  #dashboard .hero .eyebrow{display:block!important;width:100%!important;text-align:center!important;color:var(--pd-green)!important;font-weight:950!important;font-size:13px!important;line-height:1.4!important;letter-spacing:.12em!important;margin-bottom:10px!important}
   #dashboard .hero h2{font-family:Georgia,'Times New Roman',serif!important;color:var(--pd-red)!important;letter-spacing:.025em!important}
   #dashboard .hero p{color:#315234!important;font-weight:650!important}#dashboard .hero p strong{color:var(--pd-green)!important}#dashboard .hero p span{color:#5a4a1d!important}
   .card{border-color:var(--pd-line)!important;box-shadow:0 8px 22px rgba(36,107,45,.055)!important}
@@ -63,6 +63,7 @@
 
   /* MOBILE DRAWER */
   @media(max-width:900px){
+    #dashboard .hero .eyebrow{font-size:12px!important;text-align:center!important;line-height:1.45!important}
     header{z-index:90!important}
     .top,main,.footer{margin-left:0!important}
     #pdSidebarToggle{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important}
@@ -165,7 +166,7 @@
     const hero=document.querySelector('#dashboard .hero');
     if(hero){
       const eyebrow=hero.querySelector('.eyebrow'),h2=hero.querySelector('h2'),p=hero.querySelector('p');
-      if(eyebrow)eyebrow.textContent=`${EVENT.org} • Fundraising`;
+      if(eyebrow)eyebrow.textContent=`${EVENT.org} • ${EVENT.subtitle}`;
       if(h2)h2.textContent=EVENT.title;
       if(p)p.innerHTML=`<strong>${EVENT.date}</strong><br><strong>${EVENT.time}</strong><br>${EVENT.venue}<br><span>Theme: “${EVENT.theme}”</span>`;
     }
