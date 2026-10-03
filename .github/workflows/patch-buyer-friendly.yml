@@ -1,0 +1,41 @@
+name: Patch Buyer Friendly Experience
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-friendly.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Load super-friendly buyer experience
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text()
+          tag='<script src="./buyer-friendly.js?v=1" defer></script>'
+          if tag not in s:
+              s=s.replace('</head>', tag+'</head>', 1)
+          p.write_text(s)
+          PY
+      - name: Commit buyer friendly experience
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Load super-friendly buyer experience"
+          git push origin HEAD:main
