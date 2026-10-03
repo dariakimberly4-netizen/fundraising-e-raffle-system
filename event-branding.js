@@ -9,6 +9,8 @@
     theme:'New Hope: Moving Forward Beyond Parkinson’s.',
     logo:'./assets/pd-warriors-logo.jpg?v=20261003b'
   };
+  const DASHBOARD_NEW_KEY='gt27_dashboard_new_seen_v1';
+  const DASHBOARD_NEW_VERSION='recent-sales-pending-payments-v3';
 
   const BRAND_STYLE=`
   :root{--pd-green:#246b2d;--pd-leaf:#78a91f;--pd-red:#ee3a16;--pd-gold:#d7a91f;--pd-line:#dfe8d9}
@@ -35,6 +37,13 @@
   input:focus,select:focus,textarea:focus{border-color:var(--pd-green)!important;box-shadow:0 0 0 3px rgba(36,107,45,.10)!important}
   .ticket-head{background:linear-gradient(135deg,var(--pd-green),#3e842e)!important}.ticket-no{color:var(--pd-red)!important}.footer{color:var(--pd-green)!important}
   #pdEventMark,.pd-event-mark{display:none!important}
+
+  /* FORCE-VISIBLE NEW DASHBOARD FEATURE MARKER */
+  #nav.pd-sidebar button.pd-dashboard-new{background:linear-gradient(135deg,#fff5ad,#ffe378)!important;color:#5f4700!important;border:3px solid var(--pd-gold)!important;box-shadow:0 0 0 4px rgba(215,169,31,.18),0 8px 20px rgba(116,83,0,.18)!important}
+  #nav.pd-sidebar button.pd-dashboard-new.active{background:linear-gradient(135deg,#246b2d,#3f8732)!important;color:#fff!important;border:3px solid var(--pd-gold)!important;box-shadow:0 0 0 4px rgba(215,169,31,.18),0 8px 20px rgba(36,107,45,.22)!important}
+  .pd-dashboard-new-badge{float:right;display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;border-radius:999px;background:var(--pd-red);color:#fff;font-size:9px;font-weight:950;line-height:1;letter-spacing:.06em}
+  #pdDashboardNewBanner{margin:0 0 14px!important;padding:12px 14px!important;border:3px solid var(--pd-gold)!important;border-radius:16px!important;background:linear-gradient(135deg,#fff8cf,#ffe790)!important;color:#5f4700!important;font-weight:900!important;box-shadow:0 0 0 4px rgba(215,169,31,.13),0 9px 22px rgba(116,83,0,.12)!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important}
+  #pdDashboardNewBanner .pd-new-pill{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--pd-red);color:#fff;font-size:10px;font-weight:950;letter-spacing:.06em}
 
   /* SIDEBAR */
   #nav.pd-sidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;width:245px!important;height:100vh!important;z-index:100!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:18px 14px!important;overflow-y:auto!important;background:#fff!important;border-right:1px solid var(--pd-line)!important;box-shadow:8px 0 28px rgba(36,107,45,.08)!important;pointer-events:auto!important;touch-action:manipulation!important}
@@ -71,6 +80,36 @@
     let s=document.getElementById('pdBrandStyle');
     if(!s){s=document.createElement('style');s.id='pdBrandStyle';document.head.appendChild(s)}
     s.textContent=BRAND_STYLE;
+  }
+
+  function applyDashboardNewHighlight(){
+    let isSeen=false;
+    try{isSeen=localStorage.getItem(DASHBOARD_NEW_KEY)===DASHBOARD_NEW_VERSION}catch(e){}
+    const btn=document.querySelector('#nav button[data-view="dashboard"]');
+    const dashboard=document.getElementById('dashboard');
+    if(!btn||!dashboard)return;
+    if(!isSeen){
+      btn.classList.add('pd-dashboard-new');
+      if(!btn.querySelector('.pd-dashboard-new-badge')){
+        const badge=document.createElement('span');badge.className='pd-dashboard-new-badge';badge.textContent='NEW';btn.appendChild(badge);
+      }
+      let banner=document.getElementById('pdDashboardNewBanner');
+      if(!banner){
+        banner=document.createElement('div');banner.id='pdDashboardNewBanner';
+        banner.innerHTML='<span><span class="pd-new-pill">NEW</span> &nbsp; Recent Sales + Pending Payments are now on your Seller Dashboard.</span>';
+        const hero=dashboard.querySelector('.hero');
+        if(hero)dashboard.insertBefore(banner,hero);else dashboard.insertBefore(banner,dashboard.firstChild);
+      }
+      if(!btn.dataset.pdDashboardNewBound){
+        btn.dataset.pdDashboardNewBound='1';
+        btn.addEventListener('click',()=>{
+          try{localStorage.setItem(DASHBOARD_NEW_KEY,DASHBOARD_NEW_VERSION)}catch(e){}
+          setTimeout(()=>{btn.classList.remove('pd-dashboard-new');btn.querySelector('.pd-dashboard-new-badge')?.remove();document.getElementById('pdDashboardNewBanner')?.remove()},800);
+        },{once:true});
+      }
+    }else{
+      btn.classList.remove('pd-dashboard-new');btn.querySelector('.pd-dashboard-new-badge')?.remove();document.getElementById('pdDashboardNewBanner')?.remove();
+    }
   }
 
   function setupSidebar(){
@@ -134,6 +173,7 @@
     const footer=document.querySelector('.footer');
     if(footer)footer.textContent=`${EVENT.title} • ${EVENT.subtitle} • ${EVENT.org}`;
     setupSidebar();
+    applyDashboardNewHighlight();
 
     try{
       if(typeof db!=='undefined'&&db&&db.settings){
