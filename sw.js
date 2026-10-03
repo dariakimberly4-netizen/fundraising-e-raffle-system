@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v17';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-menu-structure.js?v=2','./buyer-menu-fix.js?v=2','./buyer-section-highlights.js?v=2','./buyer-number-choice.js?v=1','./seller-release.js?v=2','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=2','./seller-next-tools.js?v=1','./seller-ops-tools.js?v=1','./seller-final-tools.js?v=1','./seller-control-number.js?v=1','./seller-number-choice.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
+const CACHE='fundraising-eraffle-v18';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-menu-structure.js?v=3','./buyer-menu-fix.js?v=3','./buyer-section-highlights.js?v=3','./buyer-number-choice.js?v=1','./seller-release.js?v=2','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=2','./seller-next-tools.js?v=1','./seller-ops-tools.js?v=1','./seller-final-tools.js?v=1','./seller-control-number.js?v=1','./seller-number-choice.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -99,7 +99,7 @@ function injectBuyerFeatures(response){
     html=html.replace(/<script src="\.\/buyer-menu-fix\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/buyer-section-highlights\.js(?:\?v=\d+)?" defer><\/script>/g,'');
     html=html.replace(/<script src="\.\/buyer-number-choice\.js(?:\?v=\d+)?" defer><\/script>/g,'');
-    html=html.replace('</head>','<script src="./buyer-feature-highlights.js?v=1" defer></script><script src="./buyer-completion.js?v=1" defer></script><script src="./buyer-number-choice.js?v=1" defer></script><script src="./buyer-menu-structure.js?v=2" defer></script><script src="./buyer-menu-fix.js?v=2" defer></script><script src="./buyer-section-highlights.js?v=2" defer></script></head>');
+    html=html.replace('</head>','<script src="./buyer-feature-highlights.js?v=1" defer></script><script src="./buyer-completion.js?v=1" defer></script><script src="./buyer-number-choice.js?v=1" defer></script><script src="./buyer-menu-structure.js?v=3" defer></script><script src="./buyer-menu-fix.js?v=3" defer></script><script src="./buyer-section-highlights.js?v=3" defer></script></head>');
     return new Response(html,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, max-age=0'}});
   });
 }
