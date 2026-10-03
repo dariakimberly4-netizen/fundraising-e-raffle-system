@@ -1,0 +1,45 @@
+name: Patch Buyer Public Only
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-public-only.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch buyer portal and offline cache
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./buyer-public-only.js?v=1" defer></script>'
+          if 'buyer-public-only.js' not in s:
+              s=s.replace('</head>',tag+'</head>',1)
+              p.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js')
+          t=sw.read_text(encoding='utf-8')
+          if 'buyer-public-only.js?v=1' not in t:
+              needle="'./buyer-pwa.js?v=1'"
+              if needle in t:
+                  t=t.replace(needle,needle+",'./buyer-public-only.js?v=1'",1)
+              else:
+                  t=t.replace("'./buyer.html'","'./buyer.html','./buyer-public-only.js?v=1'",1)
+              import re
+              t=re.sub(r"const CACHE='fundraising-eraffle-v(\\d+)'",lambda m:f"const CACHE='fundraising-eraffle-v{int(m.group(1))+1}'",t,count=1)
+              sw.write_text(t,encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Polish buyer portal as public buyer-only experience"
+          git push origin main
