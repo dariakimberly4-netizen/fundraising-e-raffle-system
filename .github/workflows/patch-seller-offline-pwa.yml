@@ -1,0 +1,67 @@
+name: Patch Seller Offline PWA
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-seller-offline-pwa.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Enable offline seller portal
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # Seller app page
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('<link rel="manifest" href="manifest.webmanifest">','<link rel="manifest" href="seller.webmanifest">')
+          if 'seller-pwa.js?v=1' not in s:
+              s=s.replace('</head>','<script src="./seller-pwa.js?v=1" defer></script></head>',1)
+          p.write_text(s)
+
+          # Seller login page
+          p=Path('seller-login.html')
+          s=p.read_text()
+          if 'seller.webmanifest' not in s:
+              s=s.replace('</head>','<link rel="manifest" href="./seller.webmanifest"><script src="./seller-pwa.js?v=1" defer></script></head>',1)
+          elif 'seller-pwa.js?v=1' not in s:
+              s=s.replace('</head>','<script src="./seller-pwa.js?v=1" defer></script></head>',1)
+          p.write_text(s)
+
+          # Service worker: cache complete seller shell + reliable login fallback.
+          p=Path('sw.js')
+          s=p.read_text()
+          s=s.replace("const CACHE='fundraising-eraffle-v19';","const CACHE='fundraising-eraffle-v20';")
+          if "'./seller-login.html'" not in s.split('\n',2)[1]:
+              s=s.replace("'./index.html',","'./index.html','./seller-login.html','./seller.webmanifest','./seller-pwa.js?v=1','./seller-role-access.js','./seller-overview-emphasis.js',",1)
+
+          seller_nav="""    if(u.pathname.endsWith('/seller-login.html')){\n      e.respondWith(fetch(e.request,{cache:'no-store'}).then(async resp=>{\n        if(resp&&resp.ok){const c=await caches.open(CACHE);await c.put('./seller-login.html',resp.clone())}\n        return resp;\n      }).catch(async()=>{const cached=await caches.match('./seller-login.html');return cached||Response.error()}));\n      return;\n    }\n"""
+          marker="    if(u.pathname.endsWith('/buy.html')){"
+          if "u.pathname.endsWith('/seller-login.html')" not in s and marker in s:
+              s=s.replace(marker,seller_nav+marker,1)
+          p.write_text(s)
+          PY
+
+      - name: Commit seller offline PWA
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html seller-login.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Enable offline seller PWA"
+          git push origin HEAD:main
