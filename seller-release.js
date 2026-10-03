@@ -4,7 +4,7 @@
   function toastMsg(msg){try{if(typeof toast==='function')toast(msg);else alert(msg)}catch(e){alert(msg)}}
   function getSale(id){try{return db.sales.find(s=>s.id===id)}catch(e){return null}}
   function getTickets(id){try{return db.tickets.filter(t=>t.saleId===id&&!t.voided&&t.status==='paid')}catch(e){return[]}}
-  function codeForSale(sale){const tickets=getTickets(sale.id);if(!tickets.length)return'';return PREFIX+enc({v:1,campaign:'GET TOGETHER 2027',saleId:sale.id,buyerName:sale.buyerName,issuedAt:new Date().toISOString(),drawDate:'2027-01-16',tickets:tickets.map(t=>({number:t.number,code:t.code,buyerName:t.buyerName,price:t.price}))})}
+  function codeForSale(sale){const tickets=getTickets(sale.id);if(!tickets.length)return'';return PREFIX+enc({v:2,campaign:'GET TOGETHER 2027',saleId:sale.id,controlNo:sale.controlNo||'',buyerName:sale.buyerName,issuedAt:new Date().toISOString(),drawDate:'2027-01-16',tickets:tickets.map(t=>({number:t.number,code:t.code,buyerName:t.buyerName,price:t.price}))})}
   async function copyRelease(id){const sale=getSale(id);if(!sale)return;if(sale.status!=='paid'){toastMsg('Mark the sale Paid first.');return}const code=codeForSale(sale);if(!code){toastMsg('No paid tickets found for this sale.');return}try{await navigator.clipboard.writeText(code);toastMsg('Buyer Ticket Release Code copied.')}catch(e){prompt('Copy Buyer Ticket Release Code:',code)}}
   function decorate(){
     const root=document.getElementById('simpleSellerTools');if(!root)return;
