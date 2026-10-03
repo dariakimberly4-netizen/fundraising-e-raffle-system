@@ -1,0 +1,79 @@
+name: Patch Buyer Offline PWA
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-offline-pwa.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Make buyer portal offline-ready
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # Buyer page: PWA metadata + service worker helper.
+          p=Path('buyer.html')
+          s=p.read_text()
+          if 'href="./buyer.webmanifest"' not in s:
+              marker='<meta name="theme-color" content="#246b2d">'
+              addition=marker+'\n<link rel="manifest" href="./buyer.webmanifest">\n<link rel="icon" href="./assets/pd-warriors-logo.jpg?v=7">\n<meta name="mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-status-bar-style" content="default">\n<meta name="apple-mobile-web-app-title" content="GT2027 Raffle">'
+              if marker not in s:
+                  raise SystemExit('Buyer theme-color marker not found')
+              s=s.replace(marker,addition,1)
+          if 'buyer-pwa.js?v=1' not in s:
+              s=s.replace('</head>','<script src="./buyer-pwa.js?v=1" defer></script></head>',1)
+          p.write_text(s)
+
+          # Existing root service worker: preserve approved mobile sizing code exactly,
+          # only add buyer assets/navigation and offline fallback behavior.
+          p=Path('sw.js')
+          s=p.read_text()
+          s=s.replace("const CACHE='fundraising-eraffle-v18';","const CACHE='fundraising-eraffle-v19';",1)
+
+          old="'./buy.html','./verify.html'"
+          new="'./buy.html','./buyer.html','./buyer-friendly.js?v=1','./buyer-pwa.js?v=1','./buyer.webmanifest','./verify.html'"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif "'./buyer.html'" not in s:
+              raise SystemExit('Service worker asset marker not found')
+
+          if "u.pathname.endsWith('/buyer.html')" not in s:
+              marker="  }\n  const url=new URL(e.request.url);"
+              block="""    if(u.pathname.endsWith('/buyer.html')){\n      e.respondWith(fetch(e.request,{cache:'no-store'}).then(async resp=>{\n        if(resp&&resp.ok){const c=await caches.open(CACHE);await c.put('./buyer.html',resp.clone())}\n        return resp;\n      }).catch(async()=>{const cached=await caches.match('./buyer.html');return cached||Response.error()}));\n      return;\n    }\n  }\n  const url=new URL(e.request.url);"""
+              if marker not in s:
+                  raise SystemExit('Service worker navigation marker not found')
+              s=s.replace(marker,block,1)
+
+          # Existing special assets were network-only. Keep network freshness but
+          # allow their precached versions to work when completely offline.
+          old_fetch="    e.respondWith(fetch(e.request,{cache:'no-store'}));\n    return;"
+          new_fetch="    e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.match(e.request)));\n    return;"
+          if old_fetch in s:
+              s=s.replace(old_fetch,new_fetch,1)
+
+          p.write_text(s)
+          PY
+
+      - name: Commit offline buyer support
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Enable offline buyer PWA"
+          git push origin HEAD:main
