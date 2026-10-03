@@ -1,5 +1,5 @@
-const CACHE='fundraising-eraffle-v19';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-menu-structure.js?v=3','./buyer-menu-fix.js?v=3','./buyer-section-highlights.js?v=3','./buyer-number-choice.js?v=1','./seller-release.js?v=2','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=2','./seller-next-tools.js?v=1','./seller-ops-tools.js?v=1','./seller-final-tools.js?v=1','./seller-control-number.js?v=1','./seller-number-choice.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./buyer.html','./buyer-friendly.js?v=1','./buyer-pwa.js?v=1','./buyer.webmanifest','./verify.html'];
+const CACHE='fundraising-eraffle-v20';
+const ASSETS=['./','./index.html','./seller-login.html','./seller.webmanifest','./seller-pwa.js?v=1','./seller-role-access.js','./seller-overview-emphasis.js','./manifest.webmanifest','./enhancements.js?v=7','./event-branding.js?v=7','./buyer-feature-highlights.js?v=1','./seller-feature-highlights.js?v=1','./buyer-completion.js?v=1','./buyer-menu-structure.js?v=3','./buyer-menu-fix.js?v=3','./buyer-section-highlights.js?v=3','./buyer-number-choice.js?v=1','./seller-release.js?v=2','./seller-simple-overview.js?v=4','./seller-force-highlights.js?v=2','./seller-next-tools.js?v=1','./seller-ops-tools.js?v=1','./seller-final-tools.js?v=1','./seller-control-number.js?v=1','./seller-number-choice.js?v=1','./assets/pd-warriors-logo.jpg?v=7','./buy.html','./buyer.html','./buyer-friendly.js?v=1','./buyer-pwa.js?v=1','./buyer.webmanifest','./verify.html'];
 
 const PHONE_CSS=`
 html.force-phone,html.force-phone body{margin:0!important;padding:0!important;min-width:0!important;max-width:none!important;overflow-x:hidden!important}
@@ -111,6 +111,13 @@ self.addEventListener('fetch',e=>{
     const u=new URL(e.request.url);
     if(u.pathname.endsWith('/')||u.pathname.endsWith('/index.html')){
       e.respondWith(fetch(e.request,{cache:'no-store'}).then(injectAppEnhancements).catch(async()=>{const cached=await caches.match('./index.html');return cached?injectAppEnhancements(cached):Response.error()}));
+      return;
+    }
+    if(u.pathname.endsWith('/seller-login.html')){
+      e.respondWith(fetch(e.request,{cache:'no-store'}).then(async resp=>{
+        if(resp&&resp.ok){const c=await caches.open(CACHE);await c.put('./seller-login.html',resp.clone())}
+        return resp;
+      }).catch(async()=>{const cached=await caches.match('./seller-login.html');return cached||Response.error()}));
       return;
     }
     if(u.pathname.endsWith('/buy.html')){
