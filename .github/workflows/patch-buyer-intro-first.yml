@@ -1,0 +1,66 @@
+name: Patch Buyer Introduction First
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-intro-first.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Force buyer portal to open at introduction
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('buyer.html')
+          s=p.read_text()
+
+          s=re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
+          script='''<script id="buyerIntroFirst">
+(function(){
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  function showIntroductionFirst(){
+    if(location.hash && location.hash !== '#introduction'){
+      try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    }
+    window.scrollTo(0,0);
+    const intro=document.getElementById('introduction');
+    if(intro) intro.scrollIntoView({block:'start'});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',showIntroductionFirst,{once:true});
+  else showIntroductionFirst();
+  window.addEventListener('load',()=>setTimeout(showIntroductionFirst,0),{once:true});
+})();
+</script>
+'''
+          s=s.replace('</head>', script+'</head>', 1)
+          p.write_text(s)
+
+          sw=Path('sw.js')
+          if sw.exists():
+            w=sw.read_text()
+            w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v30';", w, count=1)
+            sw.write_text(w)
+          PY
+      - name: Commit intro-first buyer portal
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Open buyer portal at introduction first"
+          git push origin HEAD:main
