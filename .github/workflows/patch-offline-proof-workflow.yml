@@ -1,0 +1,58 @@
+name: Patch Offline Proof Workflow
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-offline-proof-workflow.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load offline buyer and seller workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          buyer = Path('buyer.html')
+          s = buyer.read_text()
+          tag = '<script src="./buyer-offline-workflow.js?v=1" defer></script>'
+          if tag not in s:
+              s = s.replace('</head>', tag + '</head>', 1)
+              buyer.write_text(s)
+
+          seller = Path('index.html')
+          s = seller.read_text()
+          tag = '<script src="./seller-offline-workflow.js?v=1" defer></script>'
+          if tag not in s:
+              s = s.replace('</head>', tag + '</head>', 1)
+              seller.write_text(s)
+
+          sw = Path('sw.js')
+          s = sw.read_text()
+          s = re.sub(r"const CACHE='fundraising-eraffle-v\\d+';", "const CACHE='fundraising-eraffle-v24';", s, count=1)
+          marker = "'./buyer-pwa.js?v=1'"
+          if "'./buyer-offline-workflow.js?v=1'" not in s and marker in s:
+              s = s.replace(marker, marker + ",'./buyer-offline-workflow.js?v=1'", 1)
+          marker2 = "'./seller-friendly.js?v=1'"
+          if "'./seller-offline-workflow.js?v=1'" not in s and marker2 in s:
+              s = s.replace(marker2, marker2 + ",'./seller-offline-workflow.js?v=1'", 1)
+          sw.write_text(s)
+          PY
+      - name: Commit patch
+        run: |
+          if git diff --quiet; then
+            echo "Already patched"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html index.html sw.js
+          git commit -m "Enable offline payment proof approval and ticket release"
+          git push
