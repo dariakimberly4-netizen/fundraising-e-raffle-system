@@ -1,0 +1,113 @@
+name: Patch Buyer Referral Tracking
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-referral.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add referral fields and tracking
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # --- buyer.html ---
+          p = Path('buyer.html')
+          s = p.read_text()
+
+          old = '<label>Email<input id="email" type="email" autocomplete="email" placeholder="Optional"></label><label>Payment method<select id="method">'
+          new = '<label>Email<input id="email" type="email" autocomplete="email" placeholder="Optional"></label><label>Referred by / Who invited you?<input id="referredBy" autocomplete="name" placeholder="Name of person, volunteer, or group"></label><label>Where did you hear about the raffle?<select id="referralSource"><option value="">Select one — Optional</option><option>Friend / Family</option><option>PD Warriors Member</option><option>Facebook</option><option>Messenger</option><option>Group Chat</option><option>Event / Meeting</option><option>Other</option></select></label><label>Payment method<select id="method">'
+          if 'id="referredBy"' not in s:
+              if old not in s:
+                  raise SystemExit('buyer form anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = "notes:$('notes').value.trim(),preferredNumbers:preferred,proofName:selectedFile?.name||'',proofSize:selectedFile?.size||0,status:'pending'};"
+          new = "notes:$('notes').value.trim(),referredBy:$('referredBy')?.value.trim()||'',referralSource:$('referralSource')?.value||'',preferredNumbers:preferred,proofName:selectedFile?.name||'',proofSize:selectedFile?.size||0,status:'pending'};"
+          if 'referredBy:$(\'referredBy\')' not in s:
+              if old not in s:
+                  raise SystemExit('buyer data anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = '<div class="kv"><span>Buyer</span><b id="orderBuyer"></b></div><div class="kv"><span>Tickets</span><b id="orderQty"></b></div>'
+          new = '<div class="kv"><span>Buyer</span><b id="orderBuyer"></b></div><div class="kv"><span>Referred by</span><b id="orderReferredBy">—</b></div><div class="kv"><span>Referral source</span><b id="orderReferralSource">—</b></div><div class="kv"><span>Tickets</span><b id="orderQty"></b></div>'
+          if 'id="orderReferredBy"' not in s:
+              if old not in s:
+                  raise SystemExit('buyer request summary anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = "$('orderBuyer').textContent=o.buyerName;$('orderQty').textContent=o.qty;"
+          new = "$('orderBuyer').textContent=o.buyerName;$('orderReferredBy').textContent=o.referredBy||'—';$('orderReferralSource').textContent=o.referralSource||'—';$('orderQty').textContent=o.qty;"
+          if "orderReferredBy').textContent" not in s:
+              if old not in s:
+                  raise SystemExit('renderRequest anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = "Buyer: ${o.buyerName}\\\nTickets: ${o.qty}"
+          new = "Buyer: ${o.buyerName}\\\nReferred by: ${o.referredBy||'—'}\\\nReferral source: ${o.referralSource||'—'}\\\nTickets: ${o.qty}"
+          if 'Referral source: ${o.referralSource' not in s:
+              if old not in s:
+                  raise SystemExit('share request anchor not found')
+              s = s.replace(old, new, 1)
+
+          p.write_text(s)
+
+          # --- buyer-offline-workflow.js ---
+          p = Path('buyer-offline-workflow.js')
+          s = p.read_text()
+          old = "ref:order.ref||'',preferredNumbers:order.preferredNumbers||[],status:order.status||'pending'"
+          new = "ref:order.ref||'',referredBy:order.referredBy||'',referralSource:order.referralSource||'',preferredNumbers:order.preferredNumbers||[],status:order.status||'pending'"
+          if 'referredBy:order.referredBy' not in s:
+              if old not in s:
+                  raise SystemExit('buyer history base anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = "${Number(x.qty||0)} ticket${Number(x.qty||0)===1?'':'s'} • ${peso(x.total)} • ${esc(x.method||'')}</div>"
+          new = "${Number(x.qty||0)} ticket${Number(x.qty||0)===1?'':'s'} • ${peso(x.total)} • ${esc(x.method||'')}${x.referredBy?`<br>Referred by: ${esc(x.referredBy)}`:''}${x.referralSource?` • ${esc(x.referralSource)}`:''}</div>"
+          if 'Referred by: ${esc(x.referredBy)}' not in s:
+              if old not in s:
+                  raise SystemExit('buyer history render anchor not found')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          # --- seller-offline-workflow.js ---
+          p = Path('seller-offline-workflow.js')
+          s = p.read_text()
+          old = "sale.requestId=o.requestId;sale.proofStatus='approved';"
+          new = "sale.requestId=o.requestId;sale.referredBy=o.referredBy||'';sale.referralSource=o.referralSource||'';sale.proofStatus='approved';"
+          if 'sale.referredBy=o.referredBy' not in s:
+              if old not in s:
+                  raise SystemExit('seller approved sale anchor not found')
+              s = s.replace(old, new, 1)
+
+          old = "${o.preferredNumbers?.length?`<br>Preferred: ${o.preferredNumbers.map(n=>'GT27-'+String(n).padStart(5,'0')).join(', ')}`:''}</div>"
+          new = "${o.preferredNumbers?.length?`<br>Preferred: ${o.preferredNumbers.map(n=>'GT27-'+String(n).padStart(5,'0')).join(', ')}`:''}${o.referredBy?`<br><b>Referred by:</b> ${esc(o.referredBy)}`:''}${o.referralSource?` • ${esc(o.referralSource)}`:''}</div>"
+          if '<b>Referred by:</b> ${esc(o.referredBy)}' not in s:
+              if old not in s:
+                  raise SystemExit('seller request render anchor not found')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+
+          # --- service worker cache bump ---
+          p = Path('sw.js')
+          s = p.read_text()
+          import re
+          s = re.sub(r"const CACHE='fundraising-eraffle-v(\\d+)'", lambda m: f"const CACHE='fundraising-eraffle-v{int(m.group(1))+1}'", s, count=1)
+          p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html buyer-offline-workflow.js seller-offline-workflow.js sw.js
+          git diff --cached --quiet && exit 0
+          git commit -m "Add buyer referral tracking"
+          git push
