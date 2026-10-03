@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#246b2d">
+<title>Seller Login — GET TOGETHER 2027</title>
+<style>
+:root{--green:#246b2d;--leaf:#78a91f;--red:#ee3a16;--gold:#d7a91f;--cream:#fffdf6;--ink:#233022;--muted:#687164;--line:#e4e9df}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fffdf6,#f3f7ef);color:var(--ink)}
+body{min-height:100svh;display:grid;place-items:center;padding:18px}
+main{width:min(100%,460px)}
+.card{background:#fff;border:1px solid var(--line);border-radius:26px;padding:28px 24px;box-shadow:0 18px 50px rgba(36,107,45,.11);position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(90deg,var(--green),var(--leaf),var(--gold),var(--red))}
+.logo{display:block;width:88px;height:88px;object-fit:cover;border-radius:50%;margin:2px auto 15px;border:4px solid #fff;box-shadow:0 7px 20px rgba(36,107,45,.15)}
+.kicker{text-align:center;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:950;color:var(--green)}
+h1{text-align:center;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:34px;margin:7px 0 4px}
+.org{text-align:center;color:var(--red);font-weight:900;font-size:13px;margin-bottom:20px}
+.intro{text-align:center;color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 18px}
+form{display:grid;gap:12px}label{display:grid;gap:6px;font-size:13px;font-weight:850;color:#344232}
+input{width:100%;border:1px solid #d7dfd2;border-radius:14px;padding:14px 15px;font:inherit;font-size:18px;letter-spacing:.18em;text-align:center;outline:none;background:#fff}
+input:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(36,107,45,.10)}
+button,.link{min-height:50px;border:0;border-radius:14px;padding:12px 15px;font:inherit;font-weight:950;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center}
+.primary{background:linear-gradient(135deg,var(--green),#2f7f3a);color:#fff;box-shadow:0 9px 22px rgba(36,107,45,.22)}
+.secondary{background:#f4f7f1;color:var(--green);border:1px solid #dce5d7}.danger{background:#fff3f1;color:#b13221;border:1px solid #f1d2cc}
+.status{display:none;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800;line-height:1.4}.status.error{display:block;background:#fff1ef;color:#a52d20}.status.ok{display:block;background:#eef8ee;color:#246b2d}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.small{font-size:11px;color:var(--muted);text-align:center;line-height:1.45;margin-top:16px}
+#setupFields{display:none}.reset{margin-top:10px;width:100%;font-size:12px;min-height:42px}
+@media(max-width:480px){body{padding:12px}.card{padding:24px 17px;border-radius:22px}.links{grid-template-columns:1fr}.logo{width:80px;height:80px}}
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <img class="logo" src="./assets/pd-warriors-logo.jpg" alt="Parkinson’s Disease Warriors Philippines logo">
+    <div class="kicker">GET TOGETHER 2027</div>
+    <h1 id="title">Seller Login</h1>
+    <div class="org">Parkinson’s Disease Warriors Philippines</div>
+    <p class="intro" id="intro">Enter your Seller PIN to open the raffle management system.</p>
+
+    <form id="loginForm" autocomplete="off">
+      <label id="pinLabel">Seller PIN
+        <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" required placeholder="••••">
+      </label>
+      <div id="setupFields">
+        <label>Confirm PIN
+          <input id="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" placeholder="••••">
+        </label>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <button class="primary" id="submitBtn" type="submit">Seller Login</button>
+    </form>
+
+    <button class="danger reset" id="resetBtn" type="button" hidden>Reset Seller PIN on this device</button>
+
+    <div class="links">
+      <a class="link secondary" href="./landing.html">Public Landing Page</a>
+      <a class="link secondary" href="./buy.html">Buyer Portal</a>
+    </div>
+    <div class="small">This PIN is stored only on this browser/device. On static GitHub Pages it is a convenience access gate, not server-backed security.</div>
+  </section>
+</main>
+<script>
+(function(){
+  const PIN_KEY='gt27_seller_pin_sha256_v1';
+  const AUTH_KEY='gt27_seller_auth_v1';
+  const form=document.getElementById('loginForm'),pin=document.getElementById('pin'),confirmPin=document.getElementById('confirmPin'),setupFields=document.getElementById('setupFields'),status=document.getElementById('status'),submitBtn=document.getElementById('submitBtn'),resetBtn=document.getElementById('resetBtn'),title=document.getElementById('title'),intro=document.getElementById('intro');
+
+  function stored(){return localStorage.getItem(PIN_KEY)||''}
+  function setupMode(){
+    const first=!stored();
+    setupFields.style.display=first?'block':'none';
+    confirmPin.required=first;
+    resetBtn.hidden=first;
+    title.textContent=first?'Set Seller PIN':'Seller Login';
+    intro.textContent=first?'Create a 4–8 digit Seller PIN for this device.':'Enter your Seller PIN to open the raffle management system.';
+    submitBtn.textContent=first?'Save PIN & Open Seller':'Seller Login';
+    pin.value='';confirmPin.value='';pin.focus();
+  }
+  function msg(text,type){status.textContent=text;status.className='status '+type}
+  async function hash(value){
+    const data=new TextEncoder().encode(value);
+    const out=await crypto.subtle.digest('SHA-256',data);
+    return Array.from(new Uint8Array(out)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  function valid(v){return /^\d{4,8}$/.test(v)}
+
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const value=pin.value.trim();
+    if(!valid(value)){msg('Use a 4–8 digit numeric PIN.','error');return}
+    submitBtn.disabled=true;
+    try{
+      if(!stored()){
+        if(value!==confirmPin.value.trim()){msg('PINs do not match.','error');return}
+        localStorage.setItem(PIN_KEY,await hash(value));
+        sessionStorage.setItem(AUTH_KEY,'1');
+        msg('Seller PIN created. Opening Seller Portal…','ok');
+        setTimeout(()=>location.replace('./'),250);
+      }else{
+        if(await hash(value)!==stored()){msg('Incorrect Seller PIN.','error');pin.select();return}
+        sessionStorage.setItem(AUTH_KEY,'1');
+        msg('Login successful. Opening Seller Portal…','ok');
+        setTimeout(()=>location.replace('./'),200);
+      }
+    }catch(err){msg('Unable to use Seller Login on this browser.','error')}
+    finally{submitBtn.disabled=false}
+  });
+
+  resetBtn.addEventListener('click',()=>{
+    if(!confirm('Reset the Seller PIN on this device? Raffle sales and tickets will NOT be deleted.'))return;
+    localStorage.removeItem(PIN_KEY);sessionStorage.removeItem(AUTH_KEY);msg('Seller PIN reset. Create a new PIN.','ok');setupMode();
+  });
+
+  if(sessionStorage.getItem(AUTH_KEY)==='1'&&stored())location.replace('./');else setupMode();
+})();
+</script>
+</body>
+</html>
