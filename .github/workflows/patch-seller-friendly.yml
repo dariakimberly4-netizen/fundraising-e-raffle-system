@@ -1,0 +1,46 @@
+name: Patch Seller Friendly Experience
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-seller-friendly.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add seller friendly loader and offline cache
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def add_before_head(path, tag):
+              p=Path(path)
+              s=p.read_text(encoding='utf-8')
+              if tag not in s:
+                  s=s.replace('</head>', tag+'</head>')
+                  p.write_text(s,encoding='utf-8')
+
+          add_before_head('index.html','<script src="./seller-friendly.js?v=1" defer></script>')
+          add_before_head('seller-login.html','<script src="./seller-friendly.js?v=1" defer></script>')
+
+          p=Path('sw.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("const CACHE='fundraising-eraffle-v20';","const CACHE='fundraising-eraffle-v21';")
+          s=s.replace("const CACHE='fundraising-eraffle-v19';","const CACHE='fundraising-eraffle-v21';")
+          s=s.replace("const CACHE='fundraising-eraffle-v18';","const CACHE='fundraising-eraffle-v21';")
+          if "'./seller-friendly.js?v=1'" not in s:
+              s=s.replace("'./seller-pwa.js?v=1'", "'./seller-pwa.js?v=1','./seller-friendly.js?v=1'")
+          if "url.pathname.endsWith('/seller-friendly.js')" not in s:
+              needle="url.pathname.endsWith('/seller-number-choice.js')"
+              s=s.replace(needle, needle+"||url.pathname.endsWith('/seller-friendly.js')")
+          p.write_text(s,encoding='utf-8')
+      - name: Commit seller friendly experience
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html seller-login.html sw.js
+          git diff --cached --quiet || git commit -m "Load super-friendly seller experience"
+          git push
