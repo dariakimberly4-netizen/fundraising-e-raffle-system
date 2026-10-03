@@ -132,6 +132,10 @@
     document.querySelectorAll('#sellerPendingPaymentsList [data-mark-paid]').forEach(b=>b.onclick=e=>{e.stopPropagation();setPaid(b.dataset.markPaid)});
     applyHighlights();
   }
-  function init(){render();setTimeout(render,350);setTimeout(render,900);setInterval(render,2500);document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastSignature='';render()}})}
+  function loadEmphasis(){
+    if(document.getElementById('sellerOverviewEmphasisLoader'))return;
+    const s=document.createElement('script');s.id='sellerOverviewEmphasisLoader';s.src='./seller-overview-emphasis.js?v=3&t='+Date.now();document.head.appendChild(s);
+  }
+  function init(){render();loadEmphasis();setTimeout(render,350);setTimeout(render,900);setInterval(render,2500);document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastSignature='';render()}})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
