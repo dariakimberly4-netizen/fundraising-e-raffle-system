@@ -1,0 +1,98 @@
+name: Patch Buyer Scroll Menu
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-scroll-menu.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Make buyer page fully scrollable with always-visible mobile menu
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text()
+
+          # Replace the native dropdown menu with a simple always-visible scroll nav on mobile.
+          start=s.find('<details class="nativeBuyerMenu" id="nativeBuyerMenu">')
+          end=s.find('</details>', start)
+          if start!=-1 and end!=-1:
+              end += len('</details>')
+              nav='''<nav class="buyerScrollNav" id="buyerScrollNav" aria-label="Buyer navigation">
+  <a href="#introduction">Introduction</a>
+  <a href="#buy">Buy Tickets</a>
+  <a href="#request">My Request</a>
+  <a href="#tickets">My E-Tickets</a>
+  <a href="#paymentdetails">Payment</a>
+  <a href="#draw">Raffle Info</a>
+  <a href="#howitworks">Help</a>
+</nav>'''
+              s=s[:start]+nav+s[end:]
+
+          # Add a strong scroll layout override. Keep all existing approved mobile-height code untouched.
+          marker='</style>\n</head>'
+          css='''</style>
+<style id="buyerScrollModeV3">
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.app{overflow:visible;min-height:100svh}
+.buyerScrollNav{display:none}
+@media(max-width:780px){
+  #menuBtn,.nativeBuyerMenu,#sidebar,#overlay{display:none!important}
+  .topbar{position:sticky;top:0;z-index:1000}
+  .buyerScrollNav{display:flex;position:sticky;top:76px;z-index:990;width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;gap:8px;padding:9px 10px;background:#fff;border-bottom:1px solid #dfe8d9;scrollbar-width:none}
+  .buyerScrollNav::-webkit-scrollbar{display:none}
+  .buyerScrollNav a{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 13px;border:1px solid #dfe8d9;border-radius:999px;background:#f4f8f1;color:#246b2d;text-decoration:none;font-size:13px;font-weight:900;touch-action:manipulation}
+  main.content{display:block!important;overflow:visible!important;padding-top:14px}
+  main.content .view{display:block!important;scroll-margin-top:138px;margin-bottom:18px}
+  main.content .view:not(:first-child){border-top:1px solid #edf2ea;padding-top:8px}
+  main.content:has(.view:target) .view{display:block!important}
+  main.content .view:target{display:block!important}
+}
+</style>
+</head>'''
+          if marker in s:
+              s=s.replace(marker,css,1)
+          elif 'buyerScrollModeV3' not in s:
+              s=s.replace('</head>',css,1)
+
+          # Disable the old hash router reset-to-top behavior; sections are now stacked and anchors scroll normally.
+          old="function show(route){if(!document.getElementById(route))route='introduction';document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===route));document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route));if(route==='tickets')renderTickets();if(route==='paymentdetails')renderPayment();window.scrollTo({top:0,behavior:'auto'});closeMenu()}"
+          new="function show(route){if(!document.getElementById(route))route='introduction';document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===route));document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route));if(route==='tickets')renderTickets();if(route==='paymentdetails')renderPayment();closeMenu()}"
+          if old in s:
+              s=s.replace(old,new,1)
+
+          # Make the introduction more clearly the first section.
+          s=s.replace('<h3>Welcome to the Fundraising E-Raffle</h3>','<h3>Welcome to GET TOGETHER 2027</h3>',1)
+
+          p.write_text(s)
+
+          # Bump SW cache only; do not touch PHONE_CSS/PHONE_JS or approved mobile height.
+          sw=Path('sw.js')
+          t=sw.read_text()
+          import re
+          t=re.sub(r"const CACHE='fundraising-eraffle-v(\\d+)'",lambda m:f"const CACHE='fundraising-eraffle-v{int(m.group(1))+1}'",t,count=1)
+          sw.write_text(t)
+          PY
+      - name: Commit scrollable buyer experience
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Make buyer portal fully scrollable with visible menu"
+          git push origin HEAD:main
