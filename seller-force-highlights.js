@@ -1,5 +1,5 @@
 (function(){
-  const STYLE_ID='sellerForceHighlightStyleV2';
+  const STYLE_ID='sellerForceHighlightStyleV3';
   function addStyle(){
     if(document.getElementById(STYLE_ID))return;
     const s=document.createElement('style');
@@ -36,7 +36,7 @@
     let b=document.getElementById('sellerForceTopBanner');
     if(!b){
       b=document.createElement('div');b.id='sellerForceTopBanner';
-      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Pending Counter • Seller Activity Log • End-of-Day Report • Void Sale • Void Ticket • Resend Release Code</small>';
+      b.innerHTML='<span class="sfhb">NEW</span> Seller tools added<small>Winner Claim Tracking • Date-Range Report • Quick Backup • Sale Notes • Restore Voided Sale • Draw Lock • Seller Receipt • View Buyer Tickets • Duplicate Payment Warning • Today’s Summary • Pending Counter • Seller Activity Log • End-of-Day Report • Void Sale • Void Ticket • Resend Release Code</small>';
       const hero=dashboard.querySelector('.hero');if(hero)dashboard.insertBefore(b,hero);else dashboard.insertBefore(b,dashboard.firstChild);
     }
   }
@@ -52,14 +52,19 @@
     badge(document.querySelector('#nav button[data-view="dashboard"]'),'NEW');
     badge(document.querySelector('#nav button[data-view="sell"]'),'NEW');
     badge(document.querySelector('#nav button[data-view="tickets"]'),'NEW');
+    badge(document.querySelector('#nav button[data-view="draw"]'),'NEW');
     badge(document.querySelector('#nav button[data-view="reports"]'),'NEW');
   }
-  function loadOps(){
-    if(document.getElementById('sellerOpsToolsLoader'))return;
-    const s=document.createElement('script');s.id='sellerOpsToolsLoader';s.src='./seller-ops-tools.js?v=1&t='+Date.now();document.head.appendChild(s);
+  function loadScript(id,src){
+    if(document.getElementById(id))return;
+    const s=document.createElement('script');s.id=id;s.src=src+'?v=1&t='+Date.now();document.head.appendChild(s);
+  }
+  function loadSellerTools(){
+    loadScript('sellerOpsToolsLoader','./seller-ops-tools.js');
+    loadScript('sellerFinalToolsLoader','./seller-final-tools.js');
   }
   function init(){
-    loadOps();apply();setTimeout(apply,200);setTimeout(apply,600);setTimeout(apply,1200);
+    loadSellerTools();apply();setTimeout(apply,200);setTimeout(apply,600);setTimeout(apply,1200);
     new MutationObserver(apply).observe(document.body,{childList:true,subtree:true});
     setInterval(apply,1200);
   }
