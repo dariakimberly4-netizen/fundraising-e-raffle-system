@@ -23,12 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Make buyer introduction the first screen
+      - name: Prepare buyer introduction and official e-ticket
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
+
           p = Path('buyer.html')
           if not p.exists():
               raise SystemExit('buyer.html not found')
@@ -42,6 +43,16 @@ jobs:
           s = s.replace('</head>', css + script + '</head>', 1)
           s = s.replace('</body>', '<script src="./buyer-ticket-design.js?v=1"></script></body>', 1)
           p.write_text(s)
+
+          sw = Path('sw.js')
+          if sw.exists():
+              w = sw.read_text()
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v30';", w, count=1)
+              if "'./buyer-ticket-design.js?v=1'" not in w:
+                  w = w.replace("'./buyer-offline-workflow.js?v=1',", "'./buyer-offline-workflow.js?v=1','./buyer-ticket-design.js?v=1',", 1)
+              if "url.pathname.endsWith('/buyer-ticket-design.js')" not in w:
+                  w = w.replace("url.pathname.endsWith('/buyer-mobile-simple.js')||", "url.pathname.endsWith('/buyer-mobile-simple.js')||url.pathname.endsWith('/buyer-ticket-design.js')||", 1)
+              sw.write_text(w)
           PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
