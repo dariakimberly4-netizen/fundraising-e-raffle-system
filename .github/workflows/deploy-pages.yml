@@ -29,55 +29,16 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           import re
-
-          p=Path('buyer.html')
+          p = Path('buyer.html')
           if not p.exists():
-            raise SystemExit('buyer.html not found')
-          s=p.read_text()
-
-          s=re.sub(r'<style id="buyerIntroScreen">.*?</style>\s*', '', s, flags=re.S)
-          s=re.sub(r'<script id="buyerIntroScreenScript">.*?</script>\s*', '', s, flags=re.S)
-          s=re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
-
-          css='''<style id="buyerIntroScreen">
-body:not(.buyer-started) main > :not(#introduction){display:none!important}
-body:not(.buyer-started) #introduction{min-height:calc(100svh - 94px);display:flex;flex-direction:column;justify-content:center}
-body:not(.buyer-started) .buyAction{margin-top:20px}
-@media(max-width:640px){body:not(.buyer-started) #introduction{min-height:calc(100svh - 90px)}}
-</style>
-'''
-          script='''<script id="buyerIntroScreenScript">
-(function(){
-  if('scrollRestoration' in history) history.scrollRestoration='manual';
-  function resetIntro(){
-    document.body.classList.remove('buyer-started');
-    try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
-    window.scrollTo(0,0);
-  }
-  function startBuying(e){
-    if(e)e.preventDefault();
-    document.body.classList.add('buyer-started');
-    requestAnimationFrame(function(){
-      var buy=document.getElementById('buy');
-      if(buy) buy.scrollIntoView({behavior:'smooth',block:'start'});
-    });
-  }
-  function init(){
-    resetIntro();
-    var btn=document.querySelector('#introduction .buyAction');
-    if(btn){
-      btn.textContent='BUY RAFFLE TICKET';
-      btn.setAttribute('href','#buy');
-      btn.addEventListener('click',startBuying);
-    }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-  window.addEventListener('pageshow',function(e){if(e.persisted)resetIntro()});
-})();
-</script>
-'''
-          s=s.replace('</head>', css+script+'</head>', 1)
+              raise SystemExit('buyer.html not found')
+          s = p.read_text()
+          s = re.sub(r'<style id="buyerIntroScreen">.*?</style>\s*', '', s, flags=re.S)
+          s = re.sub(r'<script id="buyerIntroScreenScript">.*?</script>\s*', '', s, flags=re.S)
+          s = re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
+          css = '<style id="buyerIntroScreen">body:not(.buyer-started) main > :not(#introduction){display:none!important}body:not(.buyer-started) #introduction{min-height:calc(100svh - 94px);display:flex;flex-direction:column;justify-content:center}body:not(.buyer-started) .buyAction{margin-top:20px}@media(max-width:640px){body:not(.buyer-started) #introduction{min-height:calc(100svh - 90px)}}</style>'
+          script = '<script id="buyerIntroScreenScript">(function(){if("scrollRestoration" in history)history.scrollRestoration="manual";function resetIntro(){document.body.classList.remove("buyer-started");try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}window.scrollTo(0,0)}function startBuying(e){if(e)e.preventDefault();document.body.classList.add("buyer-started");requestAnimationFrame(function(){var buy=document.getElementById("buy");if(buy)buy.scrollIntoView({behavior:"smooth",block:"start"})})}function init(){resetIntro();var btn=document.querySelector("#introduction .buyAction");if(btn){btn.textContent="BUY RAFFLE TICKET";btn.setAttribute("href","#buy");btn.addEventListener("click",startBuying)}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();window.addEventListener("pageshow",function(e){if(e.persisted)resetIntro()})})();</script>'
+          s = s.replace('</head>', css + script + '</head>', 1)
           p.write_text(s)
           PY
       - name: Setup Pages
