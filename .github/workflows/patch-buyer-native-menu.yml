@@ -1,0 +1,63 @@
+name: Patch Buyer Native Menu
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-native-menu.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Add native mobile menu and introduction
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('buyer.html')
+          s=p.read_text()
+
+          style='''\n<style id="buyerNativeMenuV2">\n.nativeBuyerMenu{display:none}\n.nativeBuyerMenu summary{list-style:none}\n.nativeBuyerMenu summary::-webkit-details-marker{display:none}\n.nativeBuyerMenuPanel a{display:flex;align-items:center;min-height:48px;padding:12px 14px;border-bottom:1px solid #edf2ea;color:#246b2d;text-decoration:none;font-weight:900;background:#fff;touch-action:manipulation}\n.nativeBuyerMenuPanel a:last-child{border-bottom:0}\n.nativeIntroCard{margin-top:14px;padding:16px;border:1px solid #dce9d6;border-radius:16px;background:#f7fbf4;text-align:center;color:#355336;line-height:1.6}\n.nativeIntroCard h3{margin:0 0 8px;color:#246b2d;font-family:Georgia,"Times New Roman",serif;font-size:22px}\n.nativeIntroCard p{margin:0!important}\n.nativeIntroCard .introBuyNow{display:inline-flex;margin-top:12px;min-height:48px;padding:12px 18px;border-radius:13px;background:#ee3a16;color:#fff;text-decoration:none;font-weight:950;align-items:center;justify-content:center}\n@media(max-width:780px){\n  #menuBtn{display:none!important}\n  .nativeBuyerMenu{display:block;grid-column:1;grid-row:1;justify-self:start;position:relative;z-index:2147483000}\n  .nativeBuyerMenu summary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 13px;border:1px solid #dfe8d9;border-radius:12px;background:#f4f8f1;color:#246b2d;font-weight:950;cursor:pointer;touch-action:manipulation;position:relative;z-index:2147483001}\n  .nativeBuyerMenu[open] .nativeBuyerMenuPanel{display:block}\n  .nativeBuyerMenuPanel{position:fixed;left:10px;top:70px;width:min(310px,calc(100vw - 20px));max-height:calc(100svh - 84px);overflow:auto;border:1px solid #dfe8d9;border-radius:16px;background:#fff;box-shadow:0 18px 45px rgba(34,48,34,.24);z-index:2147483001}\n  main.content:has(.view:target) .view{display:none!important}\n  main.content .view:target{display:block!important}\n}\n</style>\n'''
+
+          menu='''\n<details class="nativeBuyerMenu" id="nativeBuyerMenu">\n  <summary aria-label="Open buyer menu">☰ Menu</summary>\n  <nav class="nativeBuyerMenuPanel" aria-label="Buyer navigation">\n    <a href="#introduction" onclick="this.closest('details').removeAttribute('open')">Introduction</a>\n    <a href="#buy" onclick="this.closest('details').removeAttribute('open')">Buy Tickets</a>\n    <a href="#request" onclick="this.closest('details').removeAttribute('open')">My Request</a>\n    <a href="#tickets" onclick="this.closest('details').removeAttribute('open')">My E-Tickets</a>\n    <a href="#paymentdetails" onclick="this.closest('details').removeAttribute('open')">Payment Details & Status</a>\n    <a href="#payment" onclick="this.closest('details').removeAttribute('open')">Payment Guide</a>\n    <a href="#draw" onclick="this.closest('details').removeAttribute('open')">Draw Information</a>\n    <a href="#rules" onclick="this.closest('details').removeAttribute('open')">Raffle Rules</a>\n    <a href="#event" onclick="this.closest('details').removeAttribute('open')">Event Details</a>\n    <a href="#howitworks" onclick="this.closest('details').removeAttribute('open')">How It Works</a>\n    <a href="#contact" onclick="this.closest('details').removeAttribute('open')">Contact Organizer</a>\n    <a href="#faq" onclick="this.closest('details').removeAttribute('open')">FAQs</a>\n    <a href="./verify.html">Verify Ticket</a>\n  </nav>\n</details>\n'''
+
+          intro='''\n<div class="nativeIntroCard" id="nativeIntroCard">\n  <h3>Welcome to the Fundraising E-Raffle</h3>\n  <p>Every raffle ticket helps support Parkinson's Disease Warriors Philippines and its community activities. You do not need to attend GET TOGETHER 2027 to join. Choose the number of tickets you want, enter your buyer and payment details, and submit your request for confirmation. Once confirmed, you will receive the exact number of official e-tickets you purchased.</p>\n  <a class="introBuyNow" href="#buy">BUY RAFFLE TICKETS</a>\n</div>\n'''
+
+          if 'buyerNativeMenuV2' not in s:
+              s=s.replace('</head>',style+'</head>',1)
+          if 'id="nativeBuyerMenu"' not in s:
+              marker='<button id="menuBtn" class="menuBtn" type="button" aria-controls="sidebar" aria-expanded="false">☰ Menu</button>'
+              if marker not in s:
+                  raise SystemExit('Menu button marker not found')
+              s=s.replace(marker,marker+menu,1)
+          if 'id="nativeIntroCard"' not in s:
+              marker='<h2>GET TOGETHER 2027</h2>'
+              if marker not in s:
+                  raise SystemExit('Introduction heading marker not found')
+              s=s.replace(marker,marker+intro,1)
+
+          p.write_text(s)
+
+          sw=Path('sw.js')
+          w=sw.read_text()
+          w=w.replace("const CACHE='fundraising-eraffle-v27';","const CACHE='fundraising-eraffle-v28';")
+          sw.write_text(w)
+          PY
+      - name: Commit native buyer menu
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use native mobile buyer menu and clear introduction"
+          git push origin HEAD:main
