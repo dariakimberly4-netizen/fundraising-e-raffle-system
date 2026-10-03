@@ -1,4 +1,10 @@
 (function(){
+  const AUTH_KEY='gt27_seller_auth_v1';
+  if(sessionStorage.getItem(AUTH_KEY)!=='1'){
+    location.replace('./seller-login.html');
+    return;
+  }
+
   const STYLE_ID='sellerForceHighlightStyleV3';
   function addStyle(){
     if(document.getElementById(STYLE_ID))return;
@@ -12,6 +18,7 @@
       #sellerTodaySummary.seller-force-new:before,#sellerDuplicateNotice.seller-force-new:before{content:'NEW FEATURE';position:absolute!important;top:10px!important;right:10px!important;z-index:20!important;background:#ee3a16!important;color:#fff!important;border-radius:999px!important;padding:7px 10px!important;font-size:9px!important;font-weight:950!important;letter-spacing:.08em!important;line-height:1!important}
       #nav button.seller-force-new{background:linear-gradient(135deg,#fff1a8,#ffd24b)!important;color:#4f3b00!important;border:4px solid #d7a91f!important;box-shadow:0 0 0 6px rgba(215,169,31,.22)!important}
       #nav button.seller-force-new.active{background:#246b2d!important;color:#fff!important;border-color:#d7a91f!important}
+      #sellerLogoutBtn{background:#fff0f1!important;color:#a33038!important;border:1px solid #f1c7cb!important}
       #sellerForceTopBanner{margin:0 0 16px!important;padding:14px 15px!important;border:4px solid #d7a91f!important;border-radius:16px!important;background:linear-gradient(135deg,#fff8b8,#ffd659)!important;color:#4f3b00!important;font-weight:950!important;box-shadow:0 0 0 6px rgba(215,169,31,.20),0 12px 28px rgba(112,82,0,.18)!important;display:block!important}
       #sellerForceTopBanner .sfhb{display:inline-flex!important;margin-right:8px!important;padding:6px 9px!important;border-radius:999px!important;background:#ee3a16!important;color:#fff!important;font-size:10px!important;font-weight:950!important;letter-spacing:.07em!important}
       #sellerForceTopBanner small{display:block!important;margin-top:7px!important;color:#66521b!important;font-weight:800!important;line-height:1.4!important}
@@ -31,6 +38,12 @@
       b.className='seller-force-badge';b.textContent=label;el.appendChild(b);
     }
   }
+  function addLogout(){
+    const nav=document.getElementById('nav');if(!nav||document.getElementById('sellerLogoutBtn'))return;
+    const b=document.createElement('button');b.type='button';b.id='sellerLogoutBtn';b.textContent='Seller Logout';
+    b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();sessionStorage.removeItem(AUTH_KEY);location.replace('./seller-login.html')});
+    nav.appendChild(b);
+  }
   function banner(){
     const dashboard=document.getElementById('dashboard');if(!dashboard)return;
     let b=document.getElementById('sellerForceTopBanner');
@@ -41,7 +54,7 @@
     }
   }
   function apply(){
-    addStyle();banner();
+    addStyle();addLogout();banner();
     const today=document.getElementById('sellerTodaySummary');if(today)today.classList.add('seller-force-new');
     const duplicate=document.getElementById('sellerDuplicateNotice');if(duplicate)duplicate.classList.add('seller-force-new');
     document.querySelectorAll('[data-void-sale]').forEach(b=>badge(b,'NEW'));
