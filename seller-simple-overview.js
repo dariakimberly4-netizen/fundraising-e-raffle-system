@@ -4,7 +4,7 @@
   const RECENT_VERSION='recent-sales-v3';
   const PENDING_VERSION='pending-payments-v3';
   const TODAY_VERSION='today-summary-v1';
-  const RESEND_VERSION='resend-release-v2';
+  const RESEND_VERSION='resend-release-v3';
   const VOIDSALE_VERSION='void-sale-v2';
   const VOIDTICKET_VERSION='void-ticket-v2';
   const PREFIX='ERTKT1.';
@@ -24,6 +24,9 @@
   function sortedSales(){return sales().map((s,i)=>({s,i})).sort((a,b)=>{const ad=new Date(a.s.createdAt||a.s.date||0).getTime()||0;const bd=new Date(b.s.createdAt||b.s.date||0).getTime()||0;return bd-ad||b.i-a.i}).map(x=>x.s)}
   function enc(obj){const bytes=new TextEncoder().encode(JSON.stringify(obj));let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
   function toastMsg(msg){try{if(typeof toast==='function')toast(msg);else alert(msg)}catch(e){alert(msg)}}
+  function paidTicketsFor(saleId){return ticketsFor(saleId).filter(t=>!t.voided&&t.status==='paid')}
+  function expectedQty(s,ts){const q=Number(s?.qty??s?.quantity??s?.ticketQty);return Number.isFinite(q)&&q>0?Math.round(q):ts.length}
+  function ticketSetValid(ts){const nums=ts.map(t=>String(t.number||'').trim()),codes=ts.map(t=>String(t.code||'').trim());return !nums.some(x=>!x)&&new Set(nums).size===nums.length&&!codes.some(x=>!x)&&new Set(codes).size===codes.length}
 
   function style(){
     if(document.getElementById('sellerSimpleOverviewStyle'))return;
@@ -43,6 +46,11 @@
       #sellerSalesOverview .sale-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
       #sellerSalesOverview .sale-name{font-weight:900;color:#263524}
       #sellerSalesOverview .sale-meta{font-size:12px;color:#6b7567;margin-top:3px;line-height:1.35}
+      #sellerSalesOverview .ticket-match{display:inline-flex;margin-top:6px;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:950}
+      #sellerSalesOverview .ticket-match.ok{background:#e5f5ed;color:#187650}
+      #sellerSalesOverview .ticket-match.wait{background:#fff1d6;color:#8a6111}
+      #sellerSalesOverview .ticket-match.bad{background:#fde7e9;color:#a33038}
+      #sellerSalesOverview .control-line{font-size:11px;color:#50614d;margin-top:5px;font-weight:800}
       #sellerSalesOverview .sale-amount{font-weight:900;color:#246b2d;text-align:right;white-space:nowrap}
       #sellerSalesOverview .status-pill{display:inline-flex;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:950}
       #sellerSalesOverview .status-paid{background:#e5f5ed;color:#187650}
@@ -97,7 +105,7 @@
     let wrap=document.getElementById('sellerSalesOverview');
     if(!wrap){
       wrap=document.createElement('div');wrap.id='sellerSalesOverview';wrap.className='two';
-      wrap.innerHTML=`<div id="sellerRecentSalesCard" class="card seller-overview-card"><h3>Recent Sales</h3><p class="note">Latest buyer transactions with quick actions.</p><div id="sellerRecentSalesList"></div></div><div id="sellerPendingPaymentsCard" class="card seller-overview-card"><h3>Pending Payments</h3><p class="note">Sales still waiting for payment confirmation.</p><div id="sellerPendingPaymentsList"></div></div>`;
+      wrap.innerHTML=`<div id="sellerRecentSalesCard" class="card seller-overview-card"><h3>Recent Sales</h3><p class="note">Latest buyer transactions with exact ticket-count checks.</p><div id="sellerRecentSalesList"></div></div><div id="sellerPendingPaymentsCard" class="card seller-overview-card"><h3>Pending Payments</h3><p class="note">Sales still waiting for payment confirmation.</p><div id="sellerPendingPaymentsList"></div></div>`;
       dashboard.appendChild(wrap);
       document.getElementById('sellerRecentSalesCard')?.addEventListener('click',()=>markSeen('recent'),{once:true});
       document.getElementById('sellerPendingPaymentsCard')?.addEventListener('click',e=>{if(!e.target.closest('button'))markSeen('pending')},{once:true});
@@ -105,17 +113,20 @@
     return wrap;
   }
 
-  function releaseCode(s){
-    if(!s||s.status!=='paid'||s.voided)return '';
-    const ts=ticketsFor(s.id).filter(t=>!t.voided&&t.status==='paid');if(!ts.length)return '';
-    return PREFIX+enc({v:1,campaign:'GET TOGETHER 2027',saleId:s.id,buyerName:s.buyerName,issuedAt:new Date().toISOString(),drawDate:'2027-01-16',tickets:ts.map(t=>({number:t.number,code:t.code,buyerName:t.buyerName,price:t.price}))})
+  function releasePackage(s){
+    if(!s||s.status!=='paid'||s.voided)return{error:'Mark the sale Paid first.'};
+    const ts=paidTicketsFor(s.id);if(!ts.length)return{error:'No paid tickets found for this sale.'};
+    const expected=expectedQty(s,ts);
+    if(ts.length!==expected)return{error:`Cannot release yet. Buyer purchased ${expected} ticket${expected===1?'':'s'}, but ${ts.length} paid e-ticket${ts.length===1?' is':'s are'} ready. Issue exactly ${expected}.`};
+    if(!ticketSetValid(ts))return{error:'Cannot release: every e-ticket must have its own Ticket No. and Verification Code.'};
+    return{count:ts.length,code:PREFIX+enc({v:3,campaign:'GET TOGETHER 2027',saleId:s.id,controlNo:s.controlNo||'',buyerName:s.buyerName,issuedAt:new Date().toISOString(),drawDate:'2027-01-16',ticketCount:ts.length,tickets:ts.map(t=>({number:t.number,code:t.code,buyerName:t.buyerName,price:t.price}))})};
   }
   async function resendRelease(id){
-    const s=sales().find(x=>String(x.id)===String(id));const code=releaseCode(s);
-    if(!code){toastMsg('Mark the sale Paid first.');return}
+    const s=sales().find(x=>String(x.id)===String(id)),pack=releasePackage(s);
+    if(pack.error){toastMsg(pack.error);return}
     markActionSeen('resend');
-    const text=`GET TOGETHER 2027 Buyer Ticket Release Code\n\n${code}`;
-    try{if(navigator.share)await navigator.share({title:'GET TOGETHER 2027 Ticket Release',text});else{await navigator.clipboard.writeText(code);toastMsg('Ticket Release Code copied for resend.')}}catch(e){try{await navigator.clipboard.writeText(code);toastMsg('Ticket Release Code copied for resend.')}catch(x){prompt('Copy Ticket Release Code:',code)}}
+    const text=`GET TOGETHER 2027 Buyer Ticket Release Code\nControl No.: ${s.controlNo||'—'}\nE-Tickets: ${pack.count}\n\n${pack.code}`;
+    try{if(navigator.share)await navigator.share({title:'GET TOGETHER 2027 Ticket Release',text});else{await navigator.clipboard.writeText(pack.code);toastMsg(`${pack.count} e-ticket${pack.count===1?'':'s'} ready. Release Code copied.`)}}catch(e){try{await navigator.clipboard.writeText(pack.code);toastMsg(`${pack.count} e-ticket${pack.count===1?'':'s'} ready. Release Code copied.`)}catch(x){prompt(`Copy Ticket Release Code (${pack.count} ticket${pack.count===1?'':'s'}):`,pack.code)}}
     markSeen('recent');
   }
   function voidSale(id){
@@ -136,14 +147,17 @@
 
   function row(s,mode){
     const status=s.voided?'void':((s.status||'pending').toLowerCase()==='paid'?'paid':'pending');
-    const date=fmtDate(s.createdAt||s.date),ts=ticketsFor(s.id).length;
+    const date=fmtDate(s.createdAt||s.date),allTs=ticketsFor(s.id),paidTs=paidTicketsFor(s.id),expected=expectedQty(s,allTs),readyCount=paidTs.length;
+    const valid=ticketSetValid(paidTs),match=readyCount===expected&&valid&&status==='paid';
+    const matchClass=s.voided?'bad':status!=='paid'?'wait':match?'ok':'bad';
+    const matchText=s.voided?'Sale voided':status!=='paid'?`Purchased ${expected} • waiting for payment`:match?`${readyCount}/${expected} e-tickets ready`:`${readyCount}/${expected} e-tickets ready — incomplete`;
     let actions='';
     if(!s.voided){
       if(mode==='pending'&&status==='pending')actions+=`<button type="button" class="btn primary" data-mark-paid="${esc(s.id)}">Mark Paid</button>`;
-      if(status==='paid')actions+=`<button type="button" class="btn gold" data-resend-release="${esc(s.id)}">Resend Release Code</button>`;
+      if(status==='paid')actions+=`<button type="button" class="btn gold" data-resend-release="${esc(s.id)}">Release / Resend ${expected} E‑Ticket${expected===1?'':'s'}</button>`;
       actions+=`<button type="button" class="btn danger" data-void-sale="${esc(s.id)}">Void Sale</button>`;
     }
-    return `<div class="sale-row"><div class="sale-top"><div><div class="sale-name">${esc(s.buyerName||'Unnamed buyer')}</div><div class="sale-meta">${esc(s.contact||s.email||'No contact')} • ${Number(s.qty||ts||0)} ticket${Number(s.qty||ts||0)!==1?'s':''}${date?' • '+esc(date):''}</div></div><div class="sale-amount">${peso(s.total)}<div><span class="status-pill status-${status}">${status.toUpperCase()}</span></div></div></div>${actions?`<div class="sale-actions">${actions}</div>`:''}</div>`;
+    return `<div class="sale-row"><div class="sale-top"><div><div class="sale-name">${esc(s.buyerName||'Unnamed buyer')}</div><div class="sale-meta">${esc(s.contact||s.email||'No contact')} • Purchased ${expected} ticket${expected!==1?'s':''}${date?' • '+esc(date):''}</div><div class="ticket-match ${matchClass}">${esc(matchText)}</div><div class="control-line">Control No.: ${esc(s.controlNo||'Assigned automatically')}</div></div><div class="sale-amount">${peso(s.total)}<div><span class="status-pill status-${status}">${status.toUpperCase()}</span></div></div></div>${actions?`<div class="sale-actions">${actions}</div>`:''}</div>`;
   }
 
   function renderToday(){
@@ -165,7 +179,7 @@
   function render(){
     style();if(!ensureShell())return;renderToday();
     const all=sortedSales();const pending=all.filter(s=>!s.voided&&(s.status||'pending').toLowerCase()==='pending');
-    const signature=JSON.stringify(all.map(s=>[s.id,s.status,s.voided,s.total,s.qty,s.createdAt]).slice(0,12));
+    const signature=JSON.stringify(all.map(s=>[s.id,s.status,s.voided,s.total,s.qty,s.controlNo,s.createdAt,paidTicketsFor(s.id).length]).slice(0,12));
     if(signature!==lastSignature){
       lastSignature=signature;
       const recentBox=document.getElementById('sellerRecentSalesList'),pendingBox=document.getElementById('sellerPendingPaymentsList');
