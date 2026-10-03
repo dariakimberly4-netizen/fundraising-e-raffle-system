@@ -17,6 +17,7 @@
       const b=document.createElement('button');b.type='button';b.className='btn gold seller-release-code';b.textContent='Copy Buyer Ticket Release Code';b.dataset.saleId=sale.id;b.onclick=()=>copyRelease(sale.id);actions.appendChild(b);
     });
   }
-  function init(){decorate();const target=document.getElementById('reports')||document.body;new MutationObserver(decorate).observe(target,{childList:true,subtree:true});setInterval(decorate,1200)}
+  function loadRoleAccess(){if(document.getElementById('sellerRoleAccessLoader'))return;const s=document.createElement('script');s.id='sellerRoleAccessLoader';s.src='./seller-role-access.js?v=1&t='+Date.now();document.head.appendChild(s)}
+  function init(){loadRoleAccess();decorate();const target=document.getElementById('reports')||document.body;new MutationObserver(decorate).observe(target,{childList:true,subtree:true});setInterval(decorate,1200)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300),{once:true});else setTimeout(init,300);
 })();
