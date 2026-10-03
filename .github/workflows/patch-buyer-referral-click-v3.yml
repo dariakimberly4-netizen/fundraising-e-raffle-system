@@ -1,0 +1,48 @@
+name: Patch Buyer Referral Click V3
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-buyer-referral-click-v3.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Force fresh tappable buyer referral controls
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('buyer.html')
+          s=p.read_text()
+          s=s.replace('./buyer-friendly.js?v=2','./buyer-friendly.js?v=3')
+          s=s.replace('./buyer-friendly.js?v=1','./buyer-friendly.js?v=3')
+          p.write_text(s)
+
+          p=Path('sw.js')
+          s=p.read_text()
+          s=re.sub(r"const CACHE='fundraising-eraffle-v(\d+)'",lambda m:f"const CACHE='fundraising-eraffle-v{int(m.group(1))+1}'",s,count=1)
+          s=s.replace("'./buyer-friendly.js?v=1'","'./buyer-friendly.js?v=3'")
+          s=s.replace("'./buyer-friendly.js?v=2'","'./buyer-friendly.js?v=3'")
+          needle="url.pathname.endsWith('/buyer-profiles.js')"
+          if "url.pathname.endsWith('/buyer-friendly.js')" not in s and needle in s:
+              s=s.replace(needle,needle+"||url.pathname.endsWith('/buyer-friendly.js')")
+          p.write_text(s)
+          PY
+      - name: Commit cache and loader update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          git diff --cached --quiet || git commit -m "Force fresh tappable buyer referral controls"
+          git push
