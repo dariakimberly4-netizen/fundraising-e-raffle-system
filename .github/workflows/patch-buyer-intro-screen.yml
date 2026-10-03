@@ -1,0 +1,95 @@
+name: Patch Buyer Introduction Screen
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-intro-screen.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Make introduction the first buyer screen
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('buyer.html')
+          s=p.read_text()
+
+          # Remove any older intro-first script/style so this patch is deterministic.
+          s=re.sub(r'<style id="buyerIntroScreen">.*?</style>\s*', '', s, flags=re.S)
+          s=re.sub(r'<script id="buyerIntroScreenScript">.*?</script>\s*', '', s, flags=re.S)
+          s=re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
+
+          css='''<style id="buyerIntroScreen">
+body:not(.buyer-started) main > :not(#introduction){display:none!important}
+body:not(.buyer-started) #introduction{min-height:calc(100svh - 94px);display:flex;flex-direction:column;justify-content:center}
+body:not(.buyer-started) .buyAction{margin-top:20px}
+@media(max-width:640px){
+  body:not(.buyer-started) #introduction{min-height:calc(100svh - 90px)}
+}
+</style>
+'''
+
+          script='''<script id="buyerIntroScreenScript">
+(function(){
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  function resetToIntroduction(){
+    document.body.classList.remove('buyer-started');
+    try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+    window.scrollTo(0,0);
+  }
+  function startBuying(e){
+    if(e)e.preventDefault();
+    document.body.classList.add('buyer-started');
+    requestAnimationFrame(function(){
+      var buy=document.getElementById('buy');
+      if(buy) buy.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+  function init(){
+    resetToIntroduction();
+    var btn=document.querySelector('#introduction .buyAction');
+    if(btn){
+      btn.textContent='BUY RAFFLE TICKET';
+      btn.setAttribute('href','#buy');
+      btn.addEventListener('click',startBuying);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+  window.addEventListener('pageshow',function(e){if(e.persisted)resetToIntroduction()});
+})();
+</script>
+'''
+
+          s=s.replace('</head>', css+script+'</head>', 1)
+          p.write_text(s)
+
+          sw=Path('sw.js')
+          if sw.exists():
+            w=sw.read_text()
+            w=re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v31';", w, count=1)
+            sw.write_text(w)
+          PY
+      - name: Commit introduction-first screen
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer.html sw.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Show buyer introduction before purchase form"
+          git push origin HEAD:main
