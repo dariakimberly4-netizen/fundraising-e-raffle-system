@@ -36,7 +36,12 @@
     if(document.getElementById('buyerNumberChoiceLoader'))return;
     const s=document.createElement('script');s.id='buyerNumberChoiceLoader';s.src='./buyer-number-choice.js?v=1&t='+Date.now();document.head.appendChild(s);
   }
+  function loadBuyerMenuFix(){
+    if(document.getElementById('buyerMenuFixLoader'))return;
+    const s=document.createElement('script');s.id='buyerMenuFixLoader';s.src='./buyer-menu-fix.js?v=1&t='+Date.now();document.head.appendChild(s);
+  }
   function init(){
+    loadBuyerMenuFix();
     loadBuyerNumberChoice();
     addStyle();const seen=getSeen();
     Object.entries(FEATURES).forEach(([view,f])=>{
