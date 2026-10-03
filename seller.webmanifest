@@ -1,0 +1,19 @@
+{
+  "name": "GET TOGETHER 2027 Seller Portal",
+  "short_name": "GT2027 Seller",
+  "description": "Offline-ready seller portal for the GET TOGETHER 2027 Fundraising E-Raffle.",
+  "start_url": "./seller-login.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffdf7",
+  "theme_color": "#246b2d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./assets/pd-warriors-logo.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
