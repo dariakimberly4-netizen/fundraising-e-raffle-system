@@ -46,7 +46,7 @@
   function upsertHistory(order,extra={}){
     if(!order?.requestId)return;
     const list=history();let item=list.find(x=>x.requestId===order.requestId);
-    const base={requestId:order.requestId,createdAt:order.createdAt||new Date().toISOString(),buyerName:order.buyerName||'',qty:Number(order.qty||0),price:Number(order.price||0),total:Number(order.qty||0)*Number(order.price||0),method:order.method||'',ref:order.ref||'',preferredNumbers:order.preferredNumbers||[],status:order.status||'pending',controlNo:'',ticketCount:0,ticketNumbers:[],proofName:order.proofName||'',proofSize:Number(order.proofSize||0)};
+    const base={requestId:order.requestId,createdAt:order.createdAt||new Date().toISOString(),buyerName:order.buyerName||'',qty:Number(order.qty||0),price:Number(order.price||0),total:Number(order.qty||0)*Number(order.price||0),method:order.method||'',ref:order.ref||'',referredBy:order.referredBy||'',referralSource:order.referralSource||'',preferredNumbers:order.preferredNumbers||[],status:order.status||'pending',controlNo:'',ticketCount:0,ticketNumbers:[],proofName:order.proofName||'',proofSize:Number(order.proofSize||0)};
     if(item)Object.assign(item,base,extra,{updatedAt:new Date().toISOString()});else list.unshift(Object.assign(base,extra,{updatedAt:new Date().toISOString()}));
     saveHistory(list.slice(0,100));renderHistory();
   }
@@ -81,7 +81,7 @@
   function renderHistory(){
     const box=$('buyerHistoryList');if(!box)return;const list=history();
     if(!list.length){box.innerHTML='<div class="note">No previous purchases yet.</div>';return}
-    box.innerHTML=list.map(x=>{const st=(x.status||'pending').toLowerCase();return `<div class="bow-history-item"><div class="bow-history-top"><div><div class="bow-history-id">${esc(x.requestId)}</div><div class="bow-history-meta">${esc(new Date(x.createdAt).toLocaleString('en-PH'))}<br>${Number(x.qty||0)} ticket${Number(x.qty||0)===1?'':'s'} • ${peso(x.total)} • ${esc(x.method||'')}</div></div><span class="bow-pill bow-${st==='paid'?'paid':st==='rejected'?'rejected':'pending'}">${st==='paid'?'PAID / ISSUED':st==='rejected'?'REJECTED':'PENDING'}</span></div>${x.controlNo?`<div class="bow-history-meta"><b>Control No.:</b> ${esc(x.controlNo)}<br><b>E-Tickets:</b> ${esc(x.ticketNumbers?.join(', ')||x.ticketCount||0)}</div>`:''}${x.proofName?`<div class="bow-history-meta"><b>Proof:</b> ${esc(x.proofName)}</div>`:''}</div>`}).join('');
+    box.innerHTML=list.map(x=>{const st=(x.status||'pending').toLowerCase();return `<div class="bow-history-item"><div class="bow-history-top"><div><div class="bow-history-id">${esc(x.requestId)}</div><div class="bow-history-meta">${esc(new Date(x.createdAt).toLocaleString('en-PH'))}<br>${Number(x.qty||0)} ticket${Number(x.qty||0)===1?'':'s'} • ${peso(x.total)} • ${esc(x.method||'')}${x.referredBy?`<br>Referred by: ${esc(x.referredBy)}`:''}${x.referralSource?` • ${esc(x.referralSource)}`:''}</div></div><span class="bow-pill bow-${st==='paid'?'paid':st==='rejected'?'rejected':'pending'}">${st==='paid'?'PAID / ISSUED':st==='rejected'?'REJECTED':'PENDING'}</span></div>${x.controlNo?`<div class="bow-history-meta"><b>Control No.:</b> ${esc(x.controlNo)}<br><b>E-Tickets:</b> ${esc(x.ticketNumbers?.join(', ')||x.ticketCount||0)}</div>`:''}${x.proofName?`<div class="bow-history-meta"><b>Proof:</b> ${esc(x.proofName)}</div>`:''}</div>`}).join('');
   }
 
   async function saveSelectedProofAfterSubmit(){
