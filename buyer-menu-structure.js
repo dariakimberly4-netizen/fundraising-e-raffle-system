@@ -1,89 +1,103 @@
 (function(){
-  const STYLE_ID='buyerMenuStructureStyleV2';
-  const VIEW_TO_GROUP={
-    home:'home',buy:'buy',request:'tickets',tickets:'tickets',
-    payment:'payment',paymentdetails:'payment',
-    draw:'raffle',rules:'raffle',event:'raffle',
-    contact:'help',howitworks:'help',faq:'help'
-  };
-  function $(id){return document.getElementById(id)}
+  const STYLE_ID='buyerNativeMenuStyleV3';
+  const VALID=new Set(['home','buy','request','tickets','paymentdetails','payment','draw','rules','event','howitworks','contact','faq']);
+  const $=id=>document.getElementById(id);
+
   function addStyle(){
     if($(STYLE_ID))return;
-    const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
-      .buyer-main-nav{display:grid;gap:9px;position:relative;z-index:165;pointer-events:auto!important}
-      .buyer-main-item{display:grid;gap:6px;pointer-events:auto!important}
-      .buyer-main-btn{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;border:1px solid var(--line)!important;background:#f3f8ef!important;color:var(--green)!important;border-radius:14px!important;padding:13px 14px!important;text-align:left!important;font-weight:900!important;cursor:pointer!important;touch-action:manipulation!important;pointer-events:auto!important;position:relative!important;z-index:166!important}
-      .buyer-main-btn.active,.buyer-main-item.open>.buyer-main-btn{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
-      .buyer-chevron{font-size:15px;line-height:1;transition:transform .18s ease;pointer-events:none}
-      .buyer-main-item.open .buyer-chevron{transform:rotate(180deg)}
-      .buyer-subnav{display:none;gap:6px;padding:2px 0 2px 11px;border-left:3px solid #d7a91f;margin-left:10px;position:relative;z-index:166;pointer-events:auto!important}
-      .buyer-main-item.open .buyer-subnav{display:grid}
-      .buyer-subnav button,.buyer-subnav a{width:100%!important;border:1px solid #e4eadf!important;background:#fff!important;color:#40523d!important;border-radius:11px!important;padding:11px 12px!important;text-align:left!important;text-decoration:none!important;font-weight:800!important;font-size:13px!important;cursor:pointer!important;touch-action:manipulation!important;pointer-events:auto!important;position:relative!important;z-index:167!important}
-      .buyer-subnav button.active{background:#eef7ea!important;color:var(--green)!important;border-color:#bcd5b5!important}
-      .buyer-subnav a.verify-sub{background:#fff7df!important;color:#745700!important;border-color:#efdda0!important}
+    const s=document.createElement('style');
+    s.id=STYLE_ID;
+    s.textContent=`
+      #sidebar{z-index:220!important;pointer-events:auto!important}
+      #sidebar *{pointer-events:auto!important}
+      #overlay{z-index:200!important}
+      #menuBtn{position:relative!important;z-index:240!important;pointer-events:auto!important;touch-action:manipulation!important}
+      .topbar{z-index:250!important}
+      .buyer-native-nav{display:grid!important;gap:9px!important}
+      .buyer-native-link,.buyer-native-nav summary{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;min-height:50px!important;border:1px solid var(--line)!important;background:#f3f8ef!important;color:var(--green)!important;border-radius:14px!important;padding:13px 14px!important;text-align:left!important;font:inherit!important;font-weight:900!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;list-style:none!important;user-select:none!important}
+      .buyer-native-nav summary::-webkit-details-marker{display:none!important}
+      .buyer-native-nav details[open]>summary,.buyer-native-link.active{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
+      .buyer-native-nav summary:after{content:'⌄';font-size:16px;font-weight:900;transition:transform .15s ease}
+      .buyer-native-nav details[open]>summary:after{transform:rotate(180deg)}
+      .buyer-native-sub{display:grid!important;gap:6px!important;padding:7px 0 2px 12px!important;margin-left:10px!important;border-left:3px solid var(--gold)!important}
+      .buyer-native-sub a{display:flex!important;align-items:center!important;min-height:46px!important;border:1px solid #e4eadf!important;background:#fff!important;color:#40523d!important;border-radius:11px!important;padding:11px 12px!important;text-decoration:none!important;font-weight:800!important;font-size:13px!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+      .buyer-native-sub a.active{background:#eef7ea!important;color:var(--green)!important;border-color:#bcd5b5!important}
+      .buyer-native-sub a.verify-native{background:#fff7df!important;color:#745700!important;border-color:#efdda0!important}
       .buyer-help-card .step{padding:14px 0}
-      @media(max-width:780px){.buyer-main-btn{min-height:52px!important}.buyer-subnav button,.buyer-subnav a{min-height:48px!important;display:flex!important;align-items:center!important}}
-      @media(prefers-reduced-motion:reduce){.buyer-chevron{transition:none}}
-    `;document.head.appendChild(s);
+      @media(prefers-reduced-motion:reduce){.buyer-native-nav summary:after{transition:none}}
+    `;
+    document.head.appendChild(s);
   }
+
   function ensureHelpViews(){
     const main=document.querySelector('main.content');if(!main)return;
     const footer=main.querySelector('.footer');
     if(!$('howitworks')){
-      const sec=document.createElement('section');sec.id='howitworks';sec.className='view';sec.innerHTML=`<div class="card buyer-help-card"><h3>How It Works</h3><div class="step"><div class="stepNo">1</div><div><b>Choose your tickets</b><div class="note">Select your quantity and, if you want, request preferred raffle number(s).</div></div></div><div class="step"><div class="stepNo">2</div><div><b>Submit your details</b><div class="note">Enter your buyer information, payment method, reference, and proof when available.</div></div></div><div class="step"><div class="stepNo">3</div><div><b>Wait for seller confirmation</b><div class="note">The seller checks payment and confirms preferred raffle numbers if still available.</div></div></div><div class="step"><div class="stepNo">4</div><div><b>Receive your E‑Tickets</b><div class="note">Paste the Ticket Release Code in My E‑Tickets to save your official tickets.</div></div></div><div class="step"><div class="stepNo">5</div><div><b>Keep your Control No.</b><div class="note">The Control No. identifies the purchase while every raffle ticket has its own raffle number.</div></div></div></div>`;
+      const sec=document.createElement('section');sec.id='howitworks';sec.className='view';
+      sec.innerHTML=`<div class="card buyer-help-card"><h3>How It Works</h3><div class="step"><div class="stepNo">1</div><div><b>Choose your tickets</b><div class="note">Select your quantity and optional preferred raffle number(s).</div></div></div><div class="step"><div class="stepNo">2</div><div><b>Submit buyer and payment details</b><div class="note">Enter your information, payment reference, and proof when available.</div></div></div><div class="step"><div class="stepNo">3</div><div><b>Wait for seller confirmation</b><div class="note">The seller verifies payment and confirms available preferred numbers.</div></div></div><div class="step"><div class="stepNo">4</div><div><b>Receive your E‑Tickets</b><div class="note">Use the Ticket Release Code in My E‑Tickets.</div></div></div><div class="step"><div class="stepNo">5</div><div><b>Keep your Control No.</b><div class="note">The Control No. identifies the purchase; each raffle ticket has its own raffle number.</div></div></div></div>`;
       footer?main.insertBefore(sec,footer):main.appendChild(sec);
     }
     if(!$('faq')){
-      const sec=document.createElement('section');sec.id='faq';sec.className='view';sec.innerHTML=`<div class="card buyer-help-card"><h3>Frequently Asked Questions</h3><div class="step"><div><b>Can I buy several tickets?</b><div class="note">Yes. Each paid ticket is a separate raffle entry.</div></div></div><div class="step"><div><b>Can I choose my raffle number?</b><div class="note">Yes. It is optional and the seller confirms availability.</div></div></div><div class="step"><div><b>What is the Control No.?</b><div class="note">It is the transaction reference for your purchase, separate from the raffle number.</div></div></div><div class="step"><div><b>When do I receive my E‑Tickets?</b><div class="note">After payment verification and seller ticket release.</div></div></div></div>`;
+      const sec=document.createElement('section');sec.id='faq';sec.className='view';
+      sec.innerHTML=`<div class="card buyer-help-card"><h3>Frequently Asked Questions</h3><div class="step"><div><b>Can I buy several tickets?</b><div class="note">Yes. Each paid ticket is a separate raffle entry.</div></div></div><div class="step"><div><b>Can I choose my raffle number?</b><div class="note">Yes. Preferred numbers are optional and subject to seller confirmation.</div></div></div><div class="step"><div><b>What is the Control No.?</b><div class="note">It is the transaction reference for your purchase and is separate from your raffle number.</div></div></div><div class="step"><div><b>When do I receive my E‑Tickets?</b><div class="note">After payment verification and seller ticket release.</div></div></div></div>`;
       footer?main.insertBefore(sec,footer):main.appendChild(sec);
     }
   }
-  function closeDrawer(){
-    $('sidebar')?.classList.remove('open');$('overlay')?.classList.remove('show');$('menuBtn')?.setAttribute('aria-expanded','false');
+
+  function menuHtml(){
+    return `
+      <a class="buyer-native-link" data-native-view="home" href="#home">Home</a>
+      <a class="buyer-native-link" data-native-view="buy" href="#buy">Buy Tickets</a>
+      <details data-native-group="tickets"><summary>My Tickets</summary><div class="buyer-native-sub"><a data-native-view="tickets" href="#tickets">My E‑Tickets</a><a data-native-view="request" href="#request">My Request</a><a class="verify-native" href="./verify.html">Verify Ticket</a></div></details>
+      <details data-native-group="payment"><summary>Payment</summary><div class="buyer-native-sub"><a data-native-view="paymentdetails" href="#paymentdetails">Payment Details & Status</a><a data-native-view="payment" href="#payment">Payment Guide</a></div></details>
+      <details data-native-group="raffle"><summary>Raffle Info</summary><div class="buyer-native-sub"><a data-native-view="draw" href="#draw">Draw Information</a><a data-native-view="rules" href="#rules">Raffle Rules</a><a data-native-view="event" href="#event">Event Details</a></div></details>
+      <details data-native-group="help"><summary>Help</summary><div class="buyer-native-sub"><a data-native-view="howitworks" href="#howitworks">How It Works</a><a data-native-view="contact" href="#contact">Contact Organizer</a><a data-native-view="faq" href="#faq">FAQs</a></div></details>`;
   }
-  function activateView(view,keepDrawer){
-    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
-    document.querySelectorAll('.sideNav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
-    try{if(view==='tickets'&&typeof window.renderTickets==='function')window.renderTickets()}catch(e){}
-    try{if(view==='paymentdetails'&&typeof window.renderPaymentStatus==='function')window.renderPaymentStatus()}catch(e){}
-    syncActive(view);
-    window.scrollTo({top:0,behavior:'smooth'});
-    if(!keepDrawer)closeDrawer();
-  }
-  function syncActive(view){
-    const group=VIEW_TO_GROUP[view]||'';
-    document.querySelectorAll('.buyer-main-btn').forEach(b=>b.classList.toggle('active',b.dataset.directView===view||b.dataset.group===group));
-    document.querySelectorAll('.buyer-subnav [data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
-  }
-  function openGroup(name,defaultView){
-    document.querySelectorAll('.buyer-main-item[data-menu-group]').forEach(item=>{
-      const open=item.dataset.menuGroup===name;
-      item.classList.toggle('open',open);
-      item.querySelector('.buyer-main-btn')?.setAttribute('aria-expanded',open?'true':'false');
-    });
-    activateView(defaultView,true);
-  }
+
   function buildMenu(){
     const nav=document.querySelector('#sidebar .sideNav');if(!nav)return;
-    nav.dataset.structuredMenu='2';nav.className='sideNav buyer-main-nav';
-    nav.innerHTML=`
-      <div class="buyer-main-item"><button type="button" class="buyer-main-btn active" data-direct-view="home"><span>Home</span></button></div>
-      <div class="buyer-main-item"><button type="button" class="buyer-main-btn" data-direct-view="buy"><span>Buy Tickets</span></button></div>
-      <div class="buyer-main-item" data-menu-group="tickets"><button type="button" class="buyer-main-btn" data-group="tickets" data-default-view="tickets" aria-expanded="false"><span>My Tickets</span><span class="buyer-chevron">⌄</span></button><div class="buyer-subnav"><button type="button" data-view="request">My Request</button><button type="button" data-view="tickets">My E‑Tickets</button><a class="verify-sub" href="./verify.html">Verify Ticket</a></div></div>
-      <div class="buyer-main-item" data-menu-group="payment"><button type="button" class="buyer-main-btn" data-group="payment" data-default-view="paymentdetails" aria-expanded="false"><span>Payment</span><span class="buyer-chevron">⌄</span></button><div class="buyer-subnav"><button type="button" data-view="paymentdetails">Payment Details & Status</button><button type="button" data-view="payment">Payment Guide</button></div></div>
-      <div class="buyer-main-item" data-menu-group="raffle"><button type="button" class="buyer-main-btn" data-group="raffle" data-default-view="draw" aria-expanded="false"><span>Raffle Info</span><span class="buyer-chevron">⌄</span></button><div class="buyer-subnav"><button type="button" data-view="draw">Draw Information</button><button type="button" data-view="rules">Raffle Rules</button><button type="button" data-view="event">Event Details</button></div></div>
-      <div class="buyer-main-item" data-menu-group="help"><button type="button" class="buyer-main-btn" data-group="help" data-default-view="howitworks" aria-expanded="false"><span>Help</span><span class="buyer-chevron">⌄</span></button><div class="buyer-subnav"><button type="button" data-view="howitworks">How It Works</button><button type="button" data-view="contact">Contact Organizer</button><button type="button" data-view="faq">FAQs</button></div></div>`;
-    nav.querySelectorAll('.buyer-main-btn[data-direct-view]').forEach(btn=>{
-      btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();activateView(btn.dataset.directView,false)});
-    });
-    nav.querySelectorAll('.buyer-main-btn[data-group]').forEach(btn=>{
-      btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();openGroup(btn.dataset.group,btn.dataset.defaultView)});
-    });
-    nav.querySelectorAll('.buyer-subnav button[data-view]').forEach(btn=>{
-      btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();activateView(btn.dataset.view,false)});
-    });
-    nav.querySelectorAll('a.verify-sub').forEach(a=>a.addEventListener('click',()=>closeDrawer()));
+    if(nav.dataset.nativeMenu==='3')return;
+    nav.dataset.nativeMenu='3';
+    nav.className='sideNav buyer-native-nav';
+    nav.innerHTML=menuHtml();
+    nav.querySelectorAll('a[data-native-view]').forEach(a=>a.addEventListener('click',()=>setTimeout(syncFromHash,0)));
+    nav.querySelectorAll('a.verify-native').forEach(a=>a.addEventListener('click',closeDrawer));
   }
-  function init(){addStyle();ensureHelpViews();buildMenu();syncActive('home');setTimeout(()=>{ensureHelpViews();if(document.querySelector('#sidebar .sideNav')?.dataset.structuredMenu!=='2')buildMenu()},300)}
+
+  function closeDrawer(){
+    $('sidebar')?.classList.remove('open');
+    $('overlay')?.classList.remove('show');
+    $('menuBtn')?.setAttribute('aria-expanded','false');
+  }
+
+  function showView(view){
+    if(!VALID.has(view))view='home';
+    const target=$(view);if(!target)return false;
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+    document.querySelectorAll('[data-native-view]').forEach(a=>a.classList.toggle('active',a.dataset.nativeView===view));
+    document.querySelectorAll('.buyer-native-nav details').forEach(d=>{
+      const has=!!d.querySelector(`[data-native-view="${view}"]`);
+      if(has)d.open=true;
+    });
+    try{if(view==='tickets'&&typeof window.renderTickets==='function')window.renderTickets()}catch(e){}
+    try{if(view==='paymentdetails'&&typeof window.renderPaymentStatus==='function')window.renderPaymentStatus()}catch(e){}
+    closeDrawer();
+    window.scrollTo({top:0,behavior:'auto'});
+    return true;
+  }
+
+  function syncFromHash(){
+    const view=(location.hash||'#home').slice(1).toLowerCase();
+    if(showView(view))return;
+    setTimeout(()=>showView(view),120);
+    setTimeout(()=>showView(view),500);
+  }
+
+  function init(){
+    addStyle();ensureHelpViews();buildMenu();syncFromHash();
+    window.addEventListener('hashchange',syncFromHash);
+    setTimeout(()=>{ensureHelpViews();buildMenu();syncFromHash()},250);
+    setTimeout(()=>{ensureHelpViews();buildMenu();syncFromHash()},900);
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
