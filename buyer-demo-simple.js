@@ -37,6 +37,12 @@
       const start=$('startBtn');
       if(start)start.textContent='NEW BUY';
     }
+    const buy=$('buyCard');
+    if(buy){
+      buy.classList.remove('hidden');
+      const h=buy.querySelector('h2');
+      if(h)h.textContent='Buyer Information';
+    }
 
     const pay=$('payCard');
     if(pay && !$('paymentDestination')){
