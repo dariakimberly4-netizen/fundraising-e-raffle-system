@@ -57,7 +57,7 @@ jobs:
               x = buyer_demo.read_text()
               for name in ['buyer-demo-followup','buyer-demo-number-choice','buyer-demo-repeat-purchase','buyer-demo-operations','buyer-demo-sample','buyer-demo-simple']:
                   x = re.sub(r'<script src="\.\/'+re.escape(name)+r'\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
-              x = x.replace('</body>', '<script src="./buyer-demo-followup.js?v=1"></script><script src="./buyer-demo-number-choice.js?v=2"></script><script src="./buyer-demo-repeat-purchase.js?v=1"></script><script src="./buyer-demo-operations.js?v=1"></script><script src="./buyer-demo-sample.js?v=1"></script><script src="./buyer-demo-simple.js?v=1"></script></body>', 1)
+              x = x.replace('</body>', '<script src="./buyer-demo-followup.js?v=1"></script><script src="./buyer-demo-number-choice.js?v=2"></script><script src="./buyer-demo-repeat-purchase.js?v=2"></script><script src="./buyer-demo-operations.js?v=1"></script><script src="./buyer-demo-sample.js?v=1"></script><script src="./buyer-demo-simple.js?v=1"></script></body>', 1)
               buyer_demo.write_text(x)
 
           seller_demo = Path('seller-demo.html')
@@ -71,16 +71,17 @@ jobs:
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v44';", w, count=1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v45';", w, count=1)
               w = w.replace("'./buyer-demo-number-choice.js?v=1'", "'./buyer-demo-number-choice.js?v=2'")
+              w = w.replace("'./buyer-demo-repeat-purchase.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=2'")
               for asset, anchor in [
                   ("'./buyer-ticket-design.js?v=1'", "'./buyer-offline-workflow.js?v=1',"),
                   ("'./buyer-simple-flow.js?v=1'", "'./buyer-ticket-design.js?v=1',"),
                   ("'./seller-simple-flow.js?v=1'", "'./seller-offline-workflow.js?v=1',"),
                   ("'./buyer-demo-followup.js?v=1'", "'./buyer-simple-flow.js?v=1',"),
                   ("'./buyer-demo-number-choice.js?v=2'", "'./buyer-demo-followup.js?v=1',"),
-                  ("'./buyer-demo-repeat-purchase.js?v=1'", "'./buyer-demo-number-choice.js?v=2',"),
-                  ("'./buyer-demo-operations.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=1',"),
+                  ("'./buyer-demo-repeat-purchase.js?v=2'", "'./buyer-demo-number-choice.js?v=2',"),
+                  ("'./buyer-demo-operations.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=2',"),
                   ("'./buyer-demo-sample.js?v=1'", "'./buyer-demo-operations.js?v=1',"),
                   ("'./buyer-demo-simple.js?v=1'", "'./buyer-demo-sample.js?v=1',"),
                   ("'./seller-demo-auth.js?v=1'", "'./seller-simple-flow.js?v=1',"),
