@@ -1,0 +1,48 @@
+name: Patch GCash Only
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-gcash-only.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Make payment method GCash only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('buyer-demo.html')
+          s=p.read_text()
+          old='<label>Payment method *<select id="method"><option value="">Choose payment method</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option><option>Other</option></select></label>'
+          new='<label>Payment method<input id="method" value="GCash" readonly aria-readonly="true"></label>'
+          s=s.replace(old,new)
+          s=s.replace("if(!$('method').value)return alert('Choose a payment method.');","")
+          s=s.replace("method:$('method').value","method:'GCash'")
+          s=s.replace('Please send your payment through:','GCash payment only')
+          p.write_text(s)
+
+          for fn in ['buyer-login.html','buyer-welcome.html']:
+              q=Path(fn)
+              if not q.exists(): continue
+              x=q.read_text()
+              x=x.replace('Please send your payment through:','GCash payment only')
+              x=x.replace('Please send your payment through','GCash payment only')
+              q.write_text(x)
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add buyer-demo.html buyer-login.html buyer-welcome.html
+          if git diff --cached --quiet; then
+            echo 'No changes needed'
+          else
+            git commit -m 'Make buyer payments GCash only'
+            git push
+          fi
