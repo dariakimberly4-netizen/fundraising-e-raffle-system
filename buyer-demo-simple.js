@@ -10,9 +10,9 @@
       .buyer-simple-flow .hero .step.seller{display:none!important}
       .buyer-simple-flow .hero .eyebrow{margin-top:14px!important}
       .buyer-simple-flow .hero h1{font-size:40px!important;margin:10px 0 6px!important}
-      .buyer-simple-flow .hero .buyerIntroHeadline{font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:23px;font-weight:900;line-height:1.12;margin:8px 0 6px}
-      .buyer-simple-flow .hero .buyerIntroCopy{max-width:560px;margin:0 auto;color:#41543d;line-height:1.55;font-size:14px}
-      .buyer-simple-flow .hero .buyerIntroSupport{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:13px;padding:8px 11px;border-radius:999px;background:#fff4cb;border:1px solid #ead58b;color:#735600;font-size:11px;font-weight:900}
+      .buyer-simple-flow .hero .buyerIntroHeadline{font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px;font-weight:900;line-height:1.12;margin:10px 0 7px}
+      .buyer-simple-flow .hero .buyerIntroCopy{max-width:560px;margin:0 auto;color:#41543d;line-height:1.58;font-size:14px}
+      .buyer-simple-flow .hero .buyerIntroSupport{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;padding:8px 12px;border-radius:999px;background:#fff4cb;border:1px solid #ead58b;color:#735600;font-size:11px;font-weight:900}
       .buyer-simple-flow a[href*="seller-demo"]{display:none!important}
       .buyer-simple-flow #purchaseHistoryCard{display:none!important}
       .buyer-simple-flow #historyBtn{display:none!important}
@@ -27,13 +27,13 @@
 
     const hero=document.querySelector('.hero');
     if(hero){
-      const badge=hero.querySelector('.badge');if(badge)badge.textContent='FUNDRAISING E-RAFFLE';
+      const badge=hero.querySelector('.badge');if(badge)badge.textContent='WELCOME';
       const eyebrow=hero.querySelector('.eyebrow');if(eyebrow)eyebrow.textContent="Parkinson's Disease Warriors Philippines";
       const h1=hero.querySelector('h1');if(h1)h1.textContent='GET TOGETHER 2027';
       const p=hero.querySelector('p');
       if(p){
         const wrap=document.createElement('div');
-        wrap.innerHTML='<div class="buyerIntroHeadline">Pick a number. Support the cause. Win with purpose.</div><div class="buyerIntroCopy">Buy your fundraising raffle ticket in a few simple steps. Choose your raffle number, submit your payment, then follow up here until your e-tickets are ready.</div><div class="buyerIntroSupport">Every ticket helps support our fundraising campaign</div>';
+        wrap.innerHTML='<div class="buyerIntroHeadline">Welcome to our Fundraising E-Raffle!</div><div class="buyerIntroCopy">Thank you for supporting Parkinson\'s Disease Warriors Philippines. You can buy your raffle ticket in a few simple steps, choose your preferred raffle number, submit your payment, and follow up here until your e-tickets are ready.</div><div class="buyerIntroSupport">Your support helps make GET TOGETHER 2027 possible</div>';
         p.replaceWith(wrap);
       }
       const steps=hero.querySelector('.steps');
