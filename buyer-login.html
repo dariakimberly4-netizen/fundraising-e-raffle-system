@@ -39,7 +39,7 @@
 const PROFILE='gt27_demo_buyer_profile_v1',AUTH='gt27_demo_buyer_auth_v1';
 const nameEl=document.getElementById('buyerName'),mobileEl=document.getElementById('buyerMobile');
 try{const p=JSON.parse(localStorage.getItem(PROFILE)||'null');if(p){nameEl.value=p.name||'';mobileEl.value=p.contact||''}}catch(e){}
-document.getElementById('buyerLoginForm').addEventListener('submit',function(e){e.preventDefault();const name=nameEl.value.trim(),contact=mobileEl.value.trim();if(!name||!contact)return;let p={};try{p=JSON.parse(localStorage.getItem(PROFILE)||'{}')||{}}catch(err){}p.name=name;p.contact=contact;localStorage.setItem(PROFILE,JSON.stringify(p));sessionStorage.setItem(AUTH,JSON.stringify({name,contact,at:new Date().toISOString()}));location.href='./buyer-welcome.html';});
+document.getElementById('buyerLoginForm').addEventListener('submit',function(e){e.preventDefault();const name=nameEl.value.trim(),contact=mobileEl.value.trim();if(!name||!contact)return;let p={};try{p=JSON.parse(localStorage.getItem(PROFILE)||'{}')||{}}catch(err){}p.name=name;p.contact=contact;localStorage.setItem(PROFILE,JSON.stringify(p));sessionStorage.setItem(AUTH,JSON.stringify({name,contact,at:new Date().toISOString()}));location.href='./buyer-demo.html?start=new#buyCard';});
 })();
 </script>
 </body>
