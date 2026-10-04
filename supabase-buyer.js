@@ -4,7 +4,7 @@ const headers={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'applic
 const read=()=>{try{return JSON.parse(localStorage.getItem(LOCAL)||'null')}catch(e){return null}};
 async function submit(d){
  const token=crypto.randomUUID();
- const body={request_no:d.requestNo,buyer_name:d.name,contact:d.contact,email:d.email||null,referred_by:d.referred||null,referral_source:d.source||null,payment_method:'GCash',payment_reference:d.paymentRef||null,quantity:d.qty,total_amount:d.total,proof_name:d.proofName||null,status:'submitted',lookup_token:token};
+ const body={request_no:d.requestNo,buyer_name:d.name,contact:d.contact,email:d.email||null,referred_by:d.referred||null,referral_source:d.source||null,payment_method:'GCash',payment_reference:d.paymentRef||null,quantity:d.qty,total_amount:d.total,proof_name:d.proofName||null,proof_url:d.proofData||null,status:'submitted',lookup_token:token};
  const r=await fetch(URL+'/rest/v1/raffle_requests',{method:'POST',headers,body:JSON.stringify(body)});
  if(!r.ok)throw new Error(await r.text());
  const rows=await r.json(); d.supabaseId=rows[0]?.id; d.lookupToken=token; localStorage.setItem(LOCAL,JSON.stringify(d)); return d;
