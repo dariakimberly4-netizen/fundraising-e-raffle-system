@@ -1,0 +1,13 @@
+(function(){
+const API='https://allltrsiqauixobewipm.supabase.co/functions/v1/staff-api',TOKEN='gt27_staff_cloud_token',TX='gt27_demo_tx_v2';
+const $=id=>document.getElementById(id); const token=()=>sessionStorage.getItem(TOKEN)||'';
+async function call(action,extra={}){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,token:token(),...extra})});const j=await r.json();if(!r.ok)throw new Error(j.error||'Request failed');return j}
+function localize(r){const d={supabaseId:r.id,requestNo:r.request_no,name:r.buyer_name,contact:r.contact,email:r.email||'',referred:r.referred_by||'',source:r.referral_source||'',method:'GCash',paymentRef:r.payment_reference||'',qty:r.quantity,total:Number(r.total_amount),proofName:r.proof_name||'',proofType:(r.proof_url||'').startsWith('data:image/')?'image/*':'',proofData:r.proof_url||'',status:r.status,paymentVerifiedAt:r.payment_verified_at,issuedAt:r.issued_at};localStorage.setItem(TX,JSON.stringify(d));return d}
+async function refresh(){if(!token()){location.replace('./seller-demo-login.html');return}try{const j=await call('list');const active=(j.requests||[]).find(x=>['submitted','payment_verified'].includes(x.status))||(j.requests||[])[0];if(active){localize(active);if(!sessionStorage.getItem('gt27_cloud_loaded')){sessionStorage.setItem('gt27_cloud_loaded','1');location.reload()}}else localStorage.removeItem(TX)}catch(e){if(/expired|login/i.test(e.message)){sessionStorage.clear();location.replace('./seller-demo-login.html')}}}
+document.addEventListener('click',async e=>{const b=e.target.closest('#verifiedBtn,#rejectBtn,#issueBtn');if(!b||!token())return;e.preventDefault();e.stopImmediatePropagation();const d=JSON.parse(localStorage.getItem(TX)||'null');if(!d?.supabaseId)return alert('No synchronized buyer request.');
+try{b.disabled=true;if(b.id==='verifiedBtn'){if(!($('cProof')?.checked&&$('cAmount')?.checked&&$('cRef')?.checked))throw new Error('Complete all three payment checks first.');await call('verify',{id:d.supabaseId})}
+else if(b.id==='rejectBtn'){const reason=prompt('Reason for returning the payment:','Payment proof or amount needs review.');if(reason===null)return;await call('return',{id:d.supabaseId,reason})}
+else{const preferred=(d.preferredNumbers||d.preferred||[]);await call('issue',{id:d.supabaseId,preferred})}
+sessionStorage.removeItem('gt27_cloud_loaded');await refresh();location.reload()}catch(err){alert(err.message)}finally{b.disabled=false}},true);
+window.addEventListener('pageshow',refresh);window.addEventListener('focus',()=>refresh());setInterval(refresh,15000);
+})();
