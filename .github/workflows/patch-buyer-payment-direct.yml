@@ -1,0 +1,37 @@
+name: Patch Buyer Payment Direct
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-buyer-payment-direct.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Patch buyer payment section in source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('buyer-demo.html')
+          s=p.read_text()
+          new='''<section class="card hidden" id="payCard"><h2 style="margin:0;color:var(--green);font-family:Georgia,serif">2. Pay</h2><div id="paymentDestination" style="margin:12px 0 14px;padding:15px;border:2px solid var(--green);border-radius:16px;background:#eef7ea;text-align:center"><div style="font-size:13px;font-weight:800;color:#40523d">Please send your payment through:</div><div style="margin-top:6px;font-size:26px;font-weight:1000;color:var(--green);letter-spacing:.02em">0919 091 6041</div><div style="margin-top:3px;font-size:16px;font-weight:950;color:var(--red)">Kimberly Daria</div><div style="margin-top:9px;font-size:12px;line-height:1.5;color:#566253">After sending your payment, enter the transaction/reference number below and upload your payment proof.</div></div><label>Payment reference<input id="paymentRef" placeholder="Transaction / reference number"></label><label style="margin-top:10px">Payment proof *<input id="proof" type="file" accept="image/*,.pdf"></label><div class="notice warn" id="proofStatus" style="margin-top:10px">No proof selected.</div><button class="btn green full hidden" id="toReview" style="margin-top:12px">REVIEW MY INFORMATION</button></section>'''
+          s2,n=re.subn(r'<section class="card hidden" id="payCard">.*?</section>',new,s,count=1,flags=re.S)
+          if n!=1:
+              raise SystemExit('payCard not found')
+          p.write_text(s2)
+          PY
+      - name: Commit direct payment source fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add buyer-demo.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Show payment destination directly in buyer payment step"
+          git push
