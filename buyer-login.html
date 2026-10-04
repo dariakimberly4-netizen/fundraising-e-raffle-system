@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#246b2d">
+<title>Buyer Login — GET TOGETHER 2027</title>
+<style>
+:root{--green:#246b2d;--red:#ee3a16;--gold:#d7a91f;--cream:#fffdf6;--ink:#223022;--muted:#667164;--line:#dfe8d9}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fffdf6,#f4f8f1);color:var(--ink)}body{display:flex;flex-direction:column}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}.brand{font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:900;color:var(--green);line-height:1}.brand small{display:block;margin-top:5px;font-family:Inter,system-ui,sans-serif;font-size:10px;letter-spacing:.09em;color:var(--muted)}.logo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}main{width:min(100%,520px);margin:auto;padding:18px 16px 28px}.card{position:relative;overflow:hidden;background:#fff;border:2px solid var(--green);border-radius:26px;padding:28px 20px 24px;box-shadow:0 14px 34px rgba(36,107,45,.11)}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:linear-gradient(90deg,var(--green),#78a91f,var(--gold),var(--red))}.pill{display:inline-flex;padding:8px 13px;border-radius:999px;background:#fff4cb;border:1px solid #ead58b;color:#735600;font-size:11px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.org{margin-top:16px;font-size:11px;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:var(--green)}h1{margin:7px 0 6px;font-family:Georgia,"Times New Roman",serif;color:var(--red);font-size:38px;line-height:1}.welcome{font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:25px;font-weight:900;margin:18px 0 6px}.copy{font-size:14px;line-height:1.55;color:#40523d;margin:0 0 18px}label{display:grid;gap:7px;margin-top:12px;font-size:13px;font-weight:850;color:#40523d}input{width:100%;border:1px solid #d6e2d0;border-radius:14px;padding:14px;background:#fff;color:var(--ink);font-size:16px}.btn{width:100%;min-height:54px;border:0;border-radius:15px;background:var(--red);color:#fff;font-weight:950;font-size:15px;margin-top:18px}.note{margin-top:13px;font-size:11px;line-height:1.45;color:var(--muted);text-align:center}@media(max-width:640px){main{padding:14px}.card{padding:25px 16px 21px;border-radius:22px}h1{font-size:34px}.welcome{font-size:23px}}
+</style>
+</head>
+<body>
+<header><div class="brand">Buyer Login<small>GET TOGETHER 2027</small></div><img class="logo" src="./assets/pd-warriors-logo.jpg" alt="PD Warriors logo"></header>
+<main>
+<section class="card">
+<div class="pill">Fundraising E-Raffle</div>
+<div class="org">Parkinson's Disease Warriors Philippines</div>
+<h1>GET TOGETHER 2027</h1>
+<div class="welcome">Welcome, Buyer!</div>
+<p class="copy">Enter your name and mobile number to continue. This keeps your purchase and follow-up experience simple on this device.</p>
+<form id="buyerLoginForm">
+<label>Full name<input id="buyerName" autocomplete="name" placeholder="Your full name" required></label>
+<label>Mobile / contact<input id="buyerMobile" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxxx" required></label>
+<button class="btn" type="submit">CONTINUE</button>
+</form>
+<div class="note">Demo login only. Your details are stored locally on this device and are not a secure server account.</div>
+</section>
+</main>
+<script>
+(function(){
+const PROFILE='gt27_demo_buyer_profile_v1',AUTH='gt27_demo_buyer_auth_v1';
+const nameEl=document.getElementById('buyerName'),mobileEl=document.getElementById('buyerMobile');
+try{const p=JSON.parse(localStorage.getItem(PROFILE)||'null');if(p){nameEl.value=p.name||'';mobileEl.value=p.contact||''}}catch(e){}
+document.getElementById('buyerLoginForm').addEventListener('submit',function(e){e.preventDefault();const name=nameEl.value.trim(),contact=mobileEl.value.trim();if(!name||!contact)return;let p={};try{p=JSON.parse(localStorage.getItem(PROFILE)||'{}')||{}}catch(err){}p.name=name;p.contact=contact;localStorage.setItem(PROFILE,JSON.stringify(p));sessionStorage.setItem(AUTH,JSON.stringify({name,contact,at:new Date().toISOString()}));location.href='./buyer-welcome.html';});
+})();
+</script>
+</body>
+</html>
