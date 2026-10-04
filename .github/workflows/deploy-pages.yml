@@ -56,29 +56,42 @@ jobs:
           if buyer_demo.exists():
               x = buyer_demo.read_text()
               x = re.sub(r'<script src="\.\/buyer-demo-followup\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
-              x = x.replace('</body>', '<script src="./buyer-demo-followup.js?v=1"></script></body>', 1)
+              x = re.sub(r'<script src="\.\/buyer-demo-number-choice\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
+              x = x.replace('</body>', '<script src="./buyer-demo-followup.js?v=1"></script><script src="./buyer-demo-number-choice.js?v=1"></script></body>', 1)
               buyer_demo.write_text(x)
+
+          seller_demo = Path('seller-demo.html')
+          if seller_demo.exists():
+              x = seller_demo.read_text()
+              x = re.sub(r'<script src="\.\/seller-demo-number-choice\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
+              x = x.replace('</body>', '<script src="./seller-demo-number-choice.js?v=1"></script></body>', 1)
+              seller_demo.write_text(x)
 
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v35';", w, count=1)
-              if "'./buyer-ticket-design.js?v=1'" not in w:
-                  w = w.replace("'./buyer-offline-workflow.js?v=1',", "'./buyer-offline-workflow.js?v=1','./buyer-ticket-design.js?v=1',", 1)
-              if "'./buyer-simple-flow.js?v=1'" not in w:
-                  w = w.replace("'./buyer-ticket-design.js?v=1',", "'./buyer-ticket-design.js?v=1','./buyer-simple-flow.js?v=1',", 1)
-              if "'./seller-simple-flow.js?v=1'" not in w:
-                  w = w.replace("'./seller-offline-workflow.js?v=1',", "'./seller-offline-workflow.js?v=1','./seller-simple-flow.js?v=1',", 1)
-              if "'./buyer-demo-followup.js?v=1'" not in w:
-                  w = w.replace("'./buyer-simple-flow.js?v=1',", "'./buyer-simple-flow.js?v=1','./buyer-demo-followup.js?v=1',", 1)
-              if "url.pathname.endsWith('/buyer-ticket-design.js')" not in w:
-                  w = w.replace("url.pathname.endsWith('/buyer-mobile-simple.js')||", "url.pathname.endsWith('/buyer-mobile-simple.js')||url.pathname.endsWith('/buyer-ticket-design.js')||", 1)
-              if "url.pathname.endsWith('/buyer-simple-flow.js')" not in w:
-                  w = w.replace("url.pathname.endsWith('/buyer-ticket-design.js')||", "url.pathname.endsWith('/buyer-ticket-design.js')||url.pathname.endsWith('/buyer-simple-flow.js')||", 1)
-              if "url.pathname.endsWith('/seller-simple-flow.js')" not in w:
-                  w = w.replace("url.pathname.endsWith('/seller-friendly.js')||", "url.pathname.endsWith('/seller-friendly.js')||url.pathname.endsWith('/seller-simple-flow.js')||", 1)
-              if "url.pathname.endsWith('/buyer-demo-followup.js')" not in w:
-                  w = w.replace("url.pathname.endsWith('/buyer-simple-flow.js')||", "url.pathname.endsWith('/buyer-simple-flow.js')||url.pathname.endsWith('/buyer-demo-followup.js')||", 1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v36';", w, count=1)
+              for asset, anchor in [
+                  ("'./buyer-ticket-design.js?v=1'", "'./buyer-offline-workflow.js?v=1',"),
+                  ("'./buyer-simple-flow.js?v=1'", "'./buyer-ticket-design.js?v=1',"),
+                  ("'./seller-simple-flow.js?v=1'", "'./seller-offline-workflow.js?v=1',"),
+                  ("'./buyer-demo-followup.js?v=1'", "'./buyer-simple-flow.js?v=1',"),
+                  ("'./buyer-demo-number-choice.js?v=1'", "'./buyer-demo-followup.js?v=1',"),
+                  ("'./seller-demo-number-choice.js?v=1'", "'./seller-simple-flow.js?v=1',")
+              ]:
+                  if asset not in w:
+                      w = w.replace(anchor, anchor+asset+',', 1)
+              for path, anchor in [
+                  ('buyer-ticket-design.js','buyer-mobile-simple.js'),
+                  ('buyer-simple-flow.js','buyer-ticket-design.js'),
+                  ('seller-simple-flow.js','seller-friendly.js'),
+                  ('buyer-demo-followup.js','buyer-simple-flow.js'),
+                  ('buyer-demo-number-choice.js','buyer-demo-followup.js'),
+                  ('seller-demo-number-choice.js','seller-simple-flow.js')
+              ]:
+                  token=f"url.pathname.endsWith('/{path}')"
+                  if token not in w:
+                      w=w.replace(f"url.pathname.endsWith('/{anchor}')||", f"url.pathname.endsWith('/{anchor}')||{token}||",1)
               sw.write_text(w)
           PY
       - name: Setup Pages
