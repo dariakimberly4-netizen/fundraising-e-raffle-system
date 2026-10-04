@@ -20,7 +20,7 @@ main{width:min(100%,760px);margin:0 auto;padding:14px 14px 36px}.card{background
   <div class="demoBadge">DEMO ONLY — NO REAL PURCHASE</div>
   <div class="eyebrow">Parkinson's Disease Warriors Philippines</div>
   <h1>GET TOGETHER 2027</h1>
-  <p>See the complete buyer journey in a few taps. This demo does not save real buyer records, payment proof, or raffle entries.</p>
+  <p>You will type the buyer information yourself. This demo follows the real buyer flow but does not create real raffle records or entries.</p>
   <div class="steps">
     <div class="step active" id="s1"><b>1</b>BUY</div><div class="step" id="s2"><b>2</b>PAY</div><div class="step" id="s3"><b>3</b>SUBMIT</div><div class="step" id="s4"><b>4</b>APPROVAL</div><div class="step" id="s5"><b>5</b>GET E‑TICKETS</div>
   </div>
@@ -29,30 +29,32 @@ main{width:min(100%,760px);margin:0 auto;padding:14px 14px 36px}.card{background
 
 <section class="card hidden" id="buyCard">
   <h2 style="margin:0;color:var(--green);font-family:Georgia,serif">1. Buy Raffle Tickets</h2>
-  <p class="small">Demo details are already filled in. You can change them if you want.</p>
+  <p class="small">Enter the information you want to use for the demonstration.</p>
   <div class="grid">
-    <label>Full name<input id="name" value="Maria Santos"></label>
-    <label>Mobile / contact<input id="contact" value="0917 123 4567"></label>
-    <label>Referred by<input id="referred" value="PD Warriors Member"></label>
-    <label>Payment method<select id="method"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option></select></label>
+    <label>Full name *<input id="name" autocomplete="name" placeholder="Type buyer's full name"></label>
+    <label>Mobile / contact *<input id="contact" autocomplete="tel" placeholder="09xx xxx xxxx"></label>
+    <label>Email — optional<input id="email" type="email" autocomplete="email" placeholder="name@example.com"></label>
+    <label>Referred by<input id="referred" placeholder="Name of member / seller"></label>
+    <label>Where did you hear about the raffle?<input id="source" placeholder="Facebook, Messenger, Friend, etc."></label>
+    <label>Payment method *<select id="method"><option value="">Choose payment method</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option><option>Other</option></select></label>
   </div>
-  <div style="margin-top:12px"><b style="color:var(--green)">Choose quantity</b><div class="qty"><button data-q="1">1</button><button data-q="3" class="active">3</button><button data-q="5">5</button><button data-q="10">10</button></div></div>
-  <div class="summary"><div class="kv"><span>Ticket price</span><b>₱100</b></div><div class="kv"><span>Quantity</span><b id="qtyText">3</b></div><div class="kv"><span>Total</span><b id="totalText">₱300</b></div></div>
+  <div style="margin-top:12px"><b style="color:var(--green)">Choose quantity</b><div class="qty"><button data-q="1" class="active">1</button><button data-q="3">3</button><button data-q="5">5</button><button data-q="10">10</button></div></div>
+  <div class="summary"><div class="kv"><span>Ticket price</span><b>₱100</b></div><div class="kv"><span>Quantity</span><b id="qtyText">1</b></div><div class="kv"><span>Total</span><b id="totalText">₱100</b></div></div>
   <button class="btn green full" id="toPay" style="margin-top:12px">CONTINUE TO PAYMENT</button>
 </section>
 
 <section class="card hidden" id="payCard">
   <h2 style="margin:0;color:var(--green);font-family:Georgia,serif">2. Payment</h2>
-  <p class="small">For demo, tap the button below to simulate a payment proof being attached.</p>
-  <div class="notice pending" id="proofStatus">No demo payment proof attached yet.</div>
-  <button class="btn green full" id="attachProof" style="margin-top:12px">ATTACH DEMO PAYMENT PROOF</button>
+  <p class="small">Choose a payment proof file for the demo. The file is not uploaded or saved anywhere.</p>
+  <label>Payment Proof *<input id="proof" type="file" accept="image/*,.pdf"></label>
+  <div class="notice pending" id="proofStatus" style="margin-top:10px">No payment proof selected yet.</div>
   <button class="btn primary full hidden" id="submitRequest" style="margin-top:10px">SUBMIT TICKET REQUEST</button>
 </section>
 
 <section class="card hidden" id="submitCard">
   <h2 style="margin:0;color:var(--green);font-family:Georgia,serif">3. Request Submitted</h2>
-  <div class="notice ok">Your demo ticket request was sent to the organizer.</div>
-  <div class="summary"><div class="kv"><span>Request No.</span><b>DEMO-REQ-001</b></div><div class="kv"><span>Buyer</span><b id="submittedBuyer">Maria Santos</b></div><div class="kv"><span>Tickets</span><b id="submittedQty">3</b></div><div class="kv"><span>Status</span><b>FOR APPROVAL</b></div></div>
+  <div class="notice ok">Demo ticket request submitted to the organizer.</div>
+  <div class="summary"><div class="kv"><span>Request No.</span><b id="requestNo"></b></div><div class="kv"><span>Buyer</span><b id="submittedBuyer"></b></div><div class="kv"><span>Contact</span><b id="submittedContact"></b></div><div class="kv"><span>Tickets</span><b id="submittedQty"></b></div><div class="kv"><span>Total</span><b id="submittedTotal"></b></div><div class="kv"><span>Payment</span><b id="submittedMethod"></b></div><div class="kv"><span>Status</span><b>FOR APPROVAL</b></div></div>
   <button class="btn green full" id="simulateApproval" style="margin-top:12px">SIMULATE ORGANIZER APPROVAL</button>
 </section>
 
@@ -64,7 +66,7 @@ main{width:min(100%,760px);margin:0 auto;padding:14px 14px 36px}.card{background
 
 <section class="card hidden" id="ticketsCard">
   <h2 style="margin:0;color:var(--green);font-family:Georgia,serif">5. My Demo E‑Tickets</h2>
-  <p class="small">Each purchased ticket is a separate raffle entry. The real system gives each ticket its own Ticket No. and Verification Code.</p>
+  <p class="small">Each ticket is a separate raffle entry in the real system. These demo tickets do not create real entries.</p>
   <div id="ticketList"></div>
   <button class="btn secondary full" id="restart" style="margin-top:14px">RESTART DEMO</button>
 </section>
@@ -73,19 +75,32 @@ main{width:min(100%,760px);margin:0 auto;padding:14px 14px 36px}.card{background
 </main>
 <script>
 (function(){
-let qty=3;
+let qty=1;
 const $=id=>document.getElementById(id);
 function show(id){$(id).classList.remove('hidden');setTimeout(()=>$(id).scrollIntoView({behavior:'smooth',block:'start'}),50)}
 function step(n){for(let i=1;i<=5;i++)$('s'+i).classList.toggle('active',i<=n)}
 function money(n){return '₱'+Number(n).toLocaleString('en-PH')}
+function clean(v){return String(v||'').replace(/[&<>"']/g,'').trim()}
 $('startBtn').onclick=()=>{show('buyCard');step(1)};
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qty=Number(b.dataset.q);document.querySelectorAll('[data-q]').forEach(x=>x.classList.toggle('active',x===b));$('qtyText').textContent=qty;$('totalText').textContent=money(qty*100)});
-$('toPay').onclick=()=>{show('payCard');step(2)};
-$('attachProof').onclick=()=>{$('proofStatus').className='notice ok';$('proofStatus').textContent='Demo payment proof attached successfully.';$('submitRequest').classList.remove('hidden')};
-$('submitRequest').onclick=()=>{$('submittedBuyer').textContent=$('name').value||'Demo Buyer';$('submittedQty').textContent=qty;show('submitCard');step(3)};
+$('toPay').onclick=()=>{
+  if(!clean($('name').value))return alert('Please enter the buyer full name.');
+  if(!clean($('contact').value))return alert('Please enter the buyer contact number.');
+  if(!$('method').value)return alert('Please choose a payment method.');
+  show('payCard');step(2)
+};
+$('proof').addEventListener('change',()=>{
+  const f=$('proof').files?.[0];
+  if(!f){$('proofStatus').className='notice pending';$('proofStatus').textContent='No payment proof selected yet.';$('submitRequest').classList.add('hidden');return}
+  $('proofStatus').className='notice ok';$('proofStatus').textContent='Payment proof selected: '+f.name+'. Demo only — not uploaded or saved.';$('submitRequest').classList.remove('hidden')
+});
+$('submitRequest').onclick=()=>{
+  const req='DEMO-REQ-'+String(Math.floor(1000+Math.random()*9000));
+  $('requestNo').textContent=req;$('submittedBuyer').textContent=clean($('name').value);$('submittedContact').textContent=clean($('contact').value);$('submittedQty').textContent=qty;$('submittedTotal').textContent=money(qty*100);$('submittedMethod').textContent=$('method').value;show('submitCard');step(3)
+};
 $('simulateApproval').onclick=()=>{show('approvalCard');step(4)};
 $('showTickets').onclick=()=>{
-  const buyer=($('name').value||'Demo Buyer').replace(/[&<>"']/g,'');
+  const buyer=clean($('name').value)||'Demo Buyer';
   const control='GT27-CN-DEMO01';
   let html='';
   for(let i=0;i<qty;i++){
