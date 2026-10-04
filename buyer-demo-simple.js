@@ -33,22 +33,7 @@
 
     const hero=document.querySelector('.hero');
     if(hero){
-      const badge=hero.querySelector('.badge');if(badge)badge.textContent='WELCOME';
-      const eyebrow=hero.querySelector('.eyebrow');if(eyebrow)eyebrow.textContent="Parkinson's Disease Warriors Philippines";
-      const h1=hero.querySelector('h1');if(h1)h1.textContent='GET TOGETHER 2027';
-      const p=hero.querySelector('p');
-      if(p && !hero.querySelector('.buyerIntroHeadline')){
-        const wrap=document.createElement('div');
-        wrap.innerHTML='<div class="buyerIntroHeadline">Welcome to our Fundraising E-Raffle!</div><div class="buyerIntroCopy">Thank you for supporting Parkinson\'s Disease Warriors Philippines. You can buy your raffle ticket in a few simple steps, choose your preferred raffle number, submit your payment, and follow up here until your e-tickets are ready.</div><div class="buyerIntroSupport">Your support helps make GET TOGETHER 2027 possible</div>';
-        p.replaceWith(wrap);
-      }
-      const steps=hero.querySelector('.steps');
-      if(steps && !steps.querySelector('.simpleFollowStep')){
-        const s=document.createElement('div');
-        s.className='step simpleFollowStep';
-        s.innerHTML='<b>4</b>FOLLOW UP';
-        steps.appendChild(s);
-      }
+      hero.classList.add('hidden');
       const start=$('startBtn');
       if(start)start.textContent='NEW BUY';
     }
