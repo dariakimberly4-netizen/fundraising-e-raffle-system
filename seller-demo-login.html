@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#246b2d">
+<title>Seller Demo Login — GET TOGETHER 2027</title>
+<style>
+:root{--green:#246b2d;--leaf:#78a91f;--red:#ee3a16;--gold:#d7a91f;--ink:#233022;--muted:#687164;--line:#e4e9df}*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fffdf6,#f3f7ef);color:var(--ink)}body{min-height:100svh;display:grid;place-items:center;padding:18px}.card{width:min(100%,520px);background:#fff;border:1px solid var(--line);border-radius:26px;padding:28px 24px;box-shadow:0 18px 50px rgba(36,107,45,.11);position:relative;overflow:hidden}.card:before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(90deg,var(--green),var(--leaf),var(--gold),var(--red))}.logo{display:block;width:84px;height:84px;object-fit:cover;border-radius:50%;margin:2px auto 13px;border:4px solid #fff;box-shadow:0 7px 20px rgba(36,107,45,.15)}.kicker{text-align:center;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:950;color:var(--green)}h1{text-align:center;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:32px;margin:7px 0 4px}.org{text-align:center;color:var(--red);font-weight:900;font-size:13px;margin-bottom:15px}.intro{text-align:center;color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 15px}.accounts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}.account{border:1px solid #dce5d7;background:#f7faf5;border-radius:15px;padding:12px;text-align:left;cursor:pointer;min-height:70px}.account b{display:block;color:var(--green);font-size:15px}.account span{display:block;color:var(--muted);font-size:11px;margin-top:4px;font-weight:800}.account.active{background:var(--green);border-color:var(--green)}.account.active b,.account.active span{color:#fff}.selected{display:none;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#fff8d8;border:1px solid #ecd991;color:#644e0e;font-size:12px;font-weight:850}.selected.show{display:block}form{display:grid;gap:12px}label{display:grid;gap:6px;font-size:13px;font-weight:850;color:#344232}input{width:100%;border:1px solid #d7dfd2;border-radius:14px;padding:14px 15px;font:inherit;font-size:18px;letter-spacing:.18em;text-align:center;outline:none}.primary{min-height:50px;border:0;border-radius:14px;padding:12px 15px;font:inherit;font-weight:950;cursor:pointer;background:linear-gradient(135deg,var(--green),#2f7f3a);color:#fff}.status{display:none;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:800}.status.error{display:block;background:#fff1ef;color:#a52d20}.status.ok{display:block;background:#eef8ee;color:#246b2d}.small{font-size:11px;color:var(--muted);text-align:center;line-height:1.45;margin-top:16px}#setupFields{display:none}@media(max-width:480px){body{padding:12px}.card{padding:24px 17px;border-radius:22px}.accounts{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<section class="card">
+<img class="logo" src="./assets/pd-warriors-logo.jpg" alt="Parkinson's Disease Warriors Philippines logo">
+<div class="kicker">GET TOGETHER 2027</div><h1 id="title">Seller Login</h1><div class="org">Parkinson's Disease Warriors Philippines</div>
+<p class="intro" id="intro">Choose your seller account, then enter your PIN.</p>
+<div class="accounts">
+<button type="button" class="account" data-user="staff1"><b>Staff 1</b><span>Staff</span></button>
+<button type="button" class="account" data-user="gen"><b>Gen</b><span>Admin</span></button>
+<button type="button" class="account" data-user="bot"><b>Bot</b><span>Admin</span></button>
+<button type="button" class="account" data-user="kim"><b>Kim</b><span>Super Admin</span></button>
+</div>
+<div id="selected" class="selected"></div>
+<form id="loginForm" autocomplete="off">
+<label>Account PIN<input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" required placeholder="••••"></label>
+<div id="setupFields"><label>Confirm PIN<input id="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" placeholder="••••"></label></div>
+<div id="status" class="status" role="status"></div>
+<button class="primary" id="submitBtn" type="submit">Login</button>
+</form>
+<div class="small">Seller access only. Accounts and PINs are stored on this browser/device for the demo.</div>
+</section>
+<script>
+(function(){
+const AUTH_KEY='gt27_seller_auth_v1',USER_KEY='gt27_seller_user_v1',ROLE_KEY='gt27_seller_role_v1',NAME_KEY='gt27_seller_name_v1',PINS_KEY='gt27_seller_account_pins_v1';
+const USERS={staff1:{name:'Staff 1',role:'staff',label:'Staff'},gen:{name:'Gen',role:'admin',label:'Admin'},bot:{name:'Bot',role:'admin',label:'Admin'},kim:{name:'Kim',role:'super_admin',label:'Super Admin'}};
+const pin=document.getElementById('pin'),confirmPin=document.getElementById('confirmPin'),setupFields=document.getElementById('setupFields'),status=document.getElementById('status'),submitBtn=document.getElementById('submitBtn'),title=document.getElementById('title'),intro=document.getElementById('intro'),selected=document.getElementById('selected');let current='';
+function pins(){try{return JSON.parse(localStorage.getItem(PINS_KEY)||'{}')||{}}catch(e){return{}}}function savePins(v){localStorage.setItem(PINS_KEY,JSON.stringify(v))}function msg(t,k){status.textContent=t;status.className='status '+k}async function hash(v){const d=new TextEncoder().encode(v),o=await crypto.subtle.digest('SHA-256',d);return Array.from(new Uint8Array(o)).map(b=>b.toString(16).padStart(2,'0')).join('')}function valid(v){return /^\d{4,8}$/.test(v)}
+function choose(id){current=id;document.querySelectorAll('.account').forEach(b=>b.classList.toggle('active',b.dataset.user===id));const u=USERS[id],exists=!!pins()[id];selected.textContent=u.name+' • '+u.label;selected.classList.add('show');setupFields.style.display=exists?'none':'block';confirmPin.required=!exists;title.textContent=exists?'Seller Login':'Set Account PIN';intro.textContent=exists?'Enter the PIN for '+u.name+'.':'First use on this device: create a 4–8 digit PIN for '+u.name+'.';submitBtn.textContent=exists?'Login as '+u.name:'Save PIN & Open '+u.name;pin.value='';confirmPin.value='';status.className='status';pin.focus()}
+document.querySelectorAll('.account').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.user)));
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!current){msg('Choose a seller account first.','error');return}const value=pin.value.trim();if(!valid(value)){msg('Use a 4–8 digit numeric PIN.','error');return}submitBtn.disabled=true;try{const all=pins(),u=USERS[current];if(!all[current]){if(value!==confirmPin.value.trim()){msg('PINs do not match.','error');return}all[current]=await hash(value);savePins(all)}else if(await hash(value)!==all[current]){msg('Incorrect PIN for '+u.name+'.','error');pin.select();return}sessionStorage.setItem(AUTH_KEY,'1');sessionStorage.setItem(USER_KEY,current);sessionStorage.setItem(ROLE_KEY,u.role);sessionStorage.setItem(NAME_KEY,u.name);msg('Login successful. Opening Seller Demo…','ok');setTimeout(()=>location.replace('./seller-demo.html'),160)}finally{submitBtn.disabled=false}});
+if(sessionStorage.getItem(AUTH_KEY)==='1'&&USERS[sessionStorage.getItem(USER_KEY)])location.replace('./seller-demo.html');
+})();
+</script>
+</body>
+</html>
