@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Prepare buyer introduction and official e-ticket
+      - name: Prepare simplest buyer workflow and official e-ticket
         shell: bash
         run: |
           python - <<'PY'
@@ -38,20 +38,25 @@ jobs:
           s = re.sub(r'<script id="buyerIntroScreenScript">.*?</script>\s*', '', s, flags=re.S)
           s = re.sub(r'<script id="buyerIntroFirst">.*?</script>\s*', '', s, flags=re.S)
           s = re.sub(r'<script src="\.\/buyer-ticket-design\.js(?:\?v=\d+)?"></script>\s*', '', s, flags=re.S)
+          s = re.sub(r'<script src="\.\/buyer-simple-flow\.js(?:\?v=\d+)?"></script>\s*', '', s, flags=re.S)
           css = '<style id="buyerIntroScreen">body:not(.buyer-started) main > :not(#introduction){display:none!important}body:not(.buyer-started) #introduction{min-height:calc(100svh - 94px);display:flex;flex-direction:column;justify-content:center}body:not(.buyer-started) .buyAction{margin-top:20px}@media(max-width:640px){body:not(.buyer-started) #introduction{min-height:calc(100svh - 90px)}}</style>'
           script = '<script id="buyerIntroScreenScript">(function(){if("scrollRestoration" in history)history.scrollRestoration="manual";function resetIntro(){document.body.classList.remove("buyer-started");try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}window.scrollTo(0,0)}function startBuying(e){if(e)e.preventDefault();document.body.classList.add("buyer-started");requestAnimationFrame(function(){var buy=document.getElementById("buy");if(buy)buy.scrollIntoView({behavior:"smooth",block:"start"})})}function init(){resetIntro();var btn=document.querySelector("#introduction .buyAction");if(btn){btn.textContent="BUY RAFFLE TICKET";btn.setAttribute("href","#buy");btn.addEventListener("click",startBuying)}}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();window.addEventListener("pageshow",function(e){if(e.persisted)resetIntro()})})();</script>'
           s = s.replace('</head>', css + script + '</head>', 1)
-          s = s.replace('</body>', '<script src="./buyer-ticket-design.js?v=1"></script></body>', 1)
+          s = s.replace('</body>', '<script src="./buyer-ticket-design.js?v=1"></script><script src="./buyer-simple-flow.js?v=1"></script></body>', 1)
           p.write_text(s)
 
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v30';", w, count=1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v31';", w, count=1)
               if "'./buyer-ticket-design.js?v=1'" not in w:
                   w = w.replace("'./buyer-offline-workflow.js?v=1',", "'./buyer-offline-workflow.js?v=1','./buyer-ticket-design.js?v=1',", 1)
+              if "'./buyer-simple-flow.js?v=1'" not in w:
+                  w = w.replace("'./buyer-ticket-design.js?v=1',", "'./buyer-ticket-design.js?v=1','./buyer-simple-flow.js?v=1',", 1)
               if "url.pathname.endsWith('/buyer-ticket-design.js')" not in w:
                   w = w.replace("url.pathname.endsWith('/buyer-mobile-simple.js')||", "url.pathname.endsWith('/buyer-mobile-simple.js')||url.pathname.endsWith('/buyer-ticket-design.js')||", 1)
+              if "url.pathname.endsWith('/buyer-simple-flow.js')" not in w:
+                  w = w.replace("url.pathname.endsWith('/buyer-ticket-design.js')||", "url.pathname.endsWith('/buyer-ticket-design.js')||url.pathname.endsWith('/buyer-simple-flow.js')||", 1)
               sw.write_text(w)
           PY
       - name: Setup Pages
