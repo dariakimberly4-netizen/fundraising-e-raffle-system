@@ -1,28 +1,34 @@
 (function(){
   const $=id=>document.getElementById(id);
   function init(){
-    if(document.getElementById('buyerSimpleFlowStyle'))return;
-    const style=document.createElement('style');
-    style.id='buyerSimpleFlowStyle';
-    style.textContent=`
-      .buyer-simple-flow .hero{padding:28px 18px!important;background:linear-gradient(180deg,#fffdf6 0%,#f7fbf4 100%)!important}
-      .buyer-simple-flow .hero .steps{grid-template-columns:repeat(4,1fr)!important;margin-top:18px!important}
-      .buyer-simple-flow .hero .step.seller{display:none!important}
-      .buyer-simple-flow .hero .eyebrow{margin-top:14px!important}
-      .buyer-simple-flow .hero h1{font-size:40px!important;margin:10px 0 6px!important}
-      .buyer-simple-flow .hero .buyerIntroHeadline{font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px;font-weight:900;line-height:1.12;margin:10px 0 7px}
-      .buyer-simple-flow .hero .buyerIntroCopy{max-width:560px;margin:0 auto;color:#41543d;line-height:1.58;font-size:14px}
-      .buyer-simple-flow .hero .buyerIntroSupport{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;padding:8px 12px;border-radius:999px;background:#fff4cb;border:1px solid #ead58b;color:#735600;font-size:11px;font-weight:900}
-      .buyer-simple-flow a[href*="seller-demo"]{display:none!important}
-      .buyer-simple-flow #purchaseHistoryCard{display:none!important}
-      .buyer-simple-flow #historyBtn{display:none!important}
-      .buyer-simple-flow .simpleFollowStep{display:flex!important}
-      .buyer-simple-flow #followUpCard{border:2px solid var(--green)!important;box-shadow:0 12px 28px rgba(36,107,45,.12)!important}
-      .buyer-simple-flow #followUpCard h2{font-size:26px!important}
-      .buyer-simple-flow #heroFollowUpBtn{background:#eef5e9!important;border:2px solid var(--green)!important;color:var(--green)!important}
-      @media(max-width:640px){.buyer-simple-flow .hero{padding:24px 16px!important}.buyer-simple-flow .hero h1{font-size:34px!important}.buyer-simple-flow .hero .buyerIntroHeadline{font-size:21px}.buyer-simple-flow .hero .steps{grid-template-columns:1fr!important}.buyer-simple-flow .hero .step{display:flex!important}.buyer-simple-flow .hero .step.seller{display:none!important}}
-    `;
-    document.head.appendChild(style);
+    if(!document.getElementById('buyerSimpleFlowStyle')){
+      const style=document.createElement('style');
+      style.id='buyerSimpleFlowStyle';
+      style.textContent=`
+        .buyer-simple-flow .hero{padding:28px 18px!important;background:linear-gradient(180deg,#fffdf6 0%,#f7fbf4 100%)!important}
+        .buyer-simple-flow .hero .steps{grid-template-columns:repeat(4,1fr)!important;margin-top:18px!important}
+        .buyer-simple-flow .hero .step.seller{display:none!important}
+        .buyer-simple-flow .hero .eyebrow{margin-top:14px!important}
+        .buyer-simple-flow .hero h1{font-size:40px!important;margin:10px 0 6px!important}
+        .buyer-simple-flow .hero .buyerIntroHeadline{font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px;font-weight:900;line-height:1.12;margin:10px 0 7px}
+        .buyer-simple-flow .hero .buyerIntroCopy{max-width:560px;margin:0 auto;color:#41543d;line-height:1.58;font-size:14px}
+        .buyer-simple-flow .hero .buyerIntroSupport{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;padding:8px 12px;border-radius:999px;background:#fff4cb;border:1px solid #ead58b;color:#735600;font-size:11px;font-weight:900}
+        .buyer-simple-flow a[href*="seller-demo"]{display:none!important}
+        .buyer-simple-flow #purchaseHistoryCard{display:none!important}
+        .buyer-simple-flow #historyBtn{display:none!important}
+        .buyer-simple-flow .simpleFollowStep{display:flex!important}
+        .buyer-simple-flow #followUpCard{border:2px solid var(--green)!important;box-shadow:0 12px 28px rgba(36,107,45,.12)!important}
+        .buyer-simple-flow #followUpCard h2{font-size:26px!important}
+        .buyer-simple-flow #heroFollowUpBtn{background:#eef5e9!important;border:2px solid var(--green)!important;color:var(--green)!important}
+        .buyer-simple-flow .paymentDestination{margin:12px 0 14px;padding:15px;border:2px solid var(--green);border-radius:16px;background:#eef7ea;text-align:center;color:#223022}
+        .buyer-simple-flow .paymentDestination .payLead{font-size:13px;font-weight:800;color:#40523d}
+        .buyer-simple-flow .paymentDestination .payNumber{margin-top:5px;font-size:24px;font-weight:1000;color:var(--green);letter-spacing:.02em}
+        .buyer-simple-flow .paymentDestination .payName{margin-top:3px;font-size:15px;font-weight:950;color:var(--red)}
+        .buyer-simple-flow .paymentDestination .payNote{margin-top:8px;font-size:11px;color:#687466;line-height:1.45}
+        @media(max-width:640px){.buyer-simple-flow .hero{padding:24px 16px!important}.buyer-simple-flow .hero h1{font-size:34px!important}.buyer-simple-flow .hero .buyerIntroHeadline{font-size:21px}.buyer-simple-flow .hero .steps{grid-template-columns:1fr!important}.buyer-simple-flow .hero .step{display:flex!important}.buyer-simple-flow .hero .step.seller{display:none!important}.buyer-simple-flow .paymentDestination .payNumber{font-size:22px}}
+      `;
+      document.head.appendChild(style);
+    }
     document.documentElement.classList.add('buyer-simple-flow');
 
     const hero=document.querySelector('.hero');
@@ -31,7 +37,7 @@
       const eyebrow=hero.querySelector('.eyebrow');if(eyebrow)eyebrow.textContent="Parkinson's Disease Warriors Philippines";
       const h1=hero.querySelector('h1');if(h1)h1.textContent='GET TOGETHER 2027';
       const p=hero.querySelector('p');
-      if(p){
+      if(p && !hero.querySelector('.buyerIntroHeadline')){
         const wrap=document.createElement('div');
         wrap.innerHTML='<div class="buyerIntroHeadline">Welcome to our Fundraising E-Raffle!</div><div class="buyerIntroCopy">Thank you for supporting Parkinson\'s Disease Warriors Philippines. You can buy your raffle ticket in a few simple steps, choose your preferred raffle number, submit your payment, and follow up here until your e-tickets are ready.</div><div class="buyerIntroSupport">Your support helps make GET TOGETHER 2027 possible</div>';
         p.replaceWith(wrap);
@@ -45,6 +51,16 @@
       }
       const start=$('startBtn');
       if(start)start.textContent='NEW BUY';
+    }
+
+    const pay=$('payCard');
+    if(pay && !$('paymentDestination')){
+      const box=document.createElement('div');
+      box.id='paymentDestination';
+      box.className='paymentDestination';
+      box.innerHTML='<div class="payLead">Please send your payment through:</div><div class="payNumber">09190916041</div><div class="payName">Kimberly Daria</div><div class="payNote">After sending your payment, enter the transaction/reference number below and upload your payment proof.</div>';
+      const heading=pay.querySelector('h2');
+      if(heading)heading.insertAdjacentElement('afterend',box); else pay.prepend(box);
     }
 
     const submitted=$('submittedCard');
