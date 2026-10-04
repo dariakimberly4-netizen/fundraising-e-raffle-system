@@ -63,15 +63,15 @@ jobs:
           seller_demo = Path('seller-demo.html')
           if seller_demo.exists():
               x = seller_demo.read_text()
-              for name in ['seller-demo-number-choice','seller-demo-queue']:
+              for name in ['seller-demo-auth','seller-demo-number-choice','seller-demo-queue']:
                   x = re.sub(r'<script src="\.\/'+re.escape(name)+r'\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
-              x = x.replace('</body>', '<script src="./seller-demo-number-choice.js?v=1"></script><script src="./seller-demo-queue.js?v=1"></script></body>', 1)
+              x = x.replace('</body>', '<script src="./seller-demo-auth.js?v=1"></script><script src="./seller-demo-number-choice.js?v=1"></script><script src="./seller-demo-queue.js?v=1"></script></body>', 1)
               seller_demo.write_text(x)
 
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v39';", w, count=1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v40';", w, count=1)
               for asset, anchor in [
                   ("'./buyer-ticket-design.js?v=1'", "'./buyer-offline-workflow.js?v=1',"),
                   ("'./buyer-simple-flow.js?v=1'", "'./buyer-ticket-design.js?v=1',"),
@@ -81,7 +81,8 @@ jobs:
                   ("'./buyer-demo-repeat-purchase.js?v=1'", "'./buyer-demo-number-choice.js?v=1',"),
                   ("'./buyer-demo-operations.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=1',"),
                   ("'./buyer-demo-sample.js?v=1'", "'./buyer-demo-operations.js?v=1',"),
-                  ("'./seller-demo-number-choice.js?v=1'", "'./seller-simple-flow.js?v=1',"),
+                  ("'./seller-demo-auth.js?v=1'", "'./seller-simple-flow.js?v=1',"),
+                  ("'./seller-demo-number-choice.js?v=1'", "'./seller-demo-auth.js?v=1',"),
                   ("'./seller-demo-queue.js?v=1'", "'./seller-demo-number-choice.js?v=1',")
               ]:
                   if asset not in w:
@@ -95,7 +96,8 @@ jobs:
                   ('buyer-demo-repeat-purchase.js','buyer-demo-number-choice.js'),
                   ('buyer-demo-operations.js','buyer-demo-repeat-purchase.js'),
                   ('buyer-demo-sample.js','buyer-demo-operations.js'),
-                  ('seller-demo-number-choice.js','seller-simple-flow.js'),
+                  ('seller-demo-auth.js','seller-simple-flow.js'),
+                  ('seller-demo-number-choice.js','seller-demo-auth.js'),
                   ('seller-demo-queue.js','seller-demo-number-choice.js')
               ]:
                   token=f"url.pathname.endsWith('/{path}')"
