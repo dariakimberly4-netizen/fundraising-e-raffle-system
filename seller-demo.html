@@ -7,7 +7,7 @@
 <title>Seller Demo — GET TOGETHER 2027</title>
 <style>
 :root{--green:#246b2d;--leaf:#78a91f;--red:#ee3a16;--gold:#d7a91f;--ink:#223022;--muted:#687164;--line:#dfe8d9;--soft:#f7fbf4}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fff,#f7fbf4);color:var(--ink)}body{padding:14px}button{font:inherit;cursor:pointer}.wrap{width:min(100%,760px);margin:0 auto}.head{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 10px 28px rgba(36,107,45,.08)}.logo{width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}.head h1{margin:0;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px}.head p{margin:4px 0 0;color:var(--muted);font-size:12px}.demoTag{margin-left:auto;background:#fff4cb;border:1px solid #ead58b;color:#705300;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950}.card{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 8px 24px rgba(36,107,45,.07)}.card h2{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px}.note{color:var(--muted);font-size:13px;line-height:1.5}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.step{border:1px solid var(--line);background:var(--soft);border-radius:15px;padding:12px;text-align:center;font-weight:900;color:var(--green);font-size:12px}.step.active{background:var(--green);color:#fff}.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #edf2ea}.kv:last-child{border-bottom:0}.kv span{color:var(--muted)}.kv b{text-align:right}.proof{margin-top:12px;border:2px dashed #cbdcc3;border-radius:16px;padding:16px;background:#fbfdf9;text-align:center}.proof strong{display:block;color:var(--green);font-size:17px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:14px;min-height:50px;padding:12px 16px;font-weight:950;flex:1 1 180px}.primary{background:var(--green);color:#fff}.red{background:var(--red);color:#fff}.secondary{background:#eef5e9;color:var(--green);border:1px solid var(--line)}.ticket{margin-top:10px;border:1px solid var(--line);border-left:5px solid var(--green);border-radius:15px;padding:12px;background:#fff}.ticketNo{font-size:22px;font-weight:950;color:var(--red)}.ticketCode{margin-top:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);font-size:12px;word-break:break-all}.success{display:inline-flex;padding:7px 10px;border-radius:999px;background:#e5f5ed;color:#187650;font-size:11px;font-weight:950}.footer{text-align:center;color:var(--muted);font-size:11px;padding:18px 8px}.hidden{display:none!important}@media(max-width:600px){.steps{grid-template-columns:1fr}.head{align-items:flex-start}.demoTag{font-size:9px;padding:6px 8px}.head h1{font-size:21px}.kv{flex-direction:column}.kv b{text-align:left}.card{padding:14px}}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#fff,#f7fbf4);color:var(--ink)}body{padding:14px}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(100%,760px);margin:0 auto}.head{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 10px 28px rgba(36,107,45,.08)}.logo{width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}.head h1{margin:0;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px}.head p{margin:4px 0 0;color:var(--muted);font-size:12px}.demoTag{margin-left:auto;background:#fff4cb;border:1px solid #ead58b;color:#705300;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:950}.card{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 8px 24px rgba(36,107,45,.07)}.card h2{margin:0 0 6px;font-family:Georgia,"Times New Roman",serif;color:var(--green);font-size:24px}.note{color:var(--muted);font-size:13px;line-height:1.5}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.step{border:1px solid var(--line);background:var(--soft);border-radius:15px;padding:12px;text-align:center;font-weight:900;color:var(--green);font-size:12px}.step.active{background:var(--green);color:#fff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:grid;gap:6px;font-size:13px;font-weight:850;color:#40523d}input,select{width:100%;border:1px solid #d6e2d0;border-radius:13px;padding:13px;background:#fff;color:var(--ink);font-size:16px}.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #edf2ea}.kv:last-child{border-bottom:0}.kv span{color:var(--muted)}.kv b{text-align:right}.proof{margin-top:12px;border:2px dashed #cbdcc3;border-radius:16px;padding:16px;background:#fbfdf9;text-align:center}.proof strong{display:block;color:var(--green);font-size:17px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:14px;min-height:50px;padding:12px 16px;font-weight:950;flex:1 1 180px}.primary{background:var(--green);color:#fff}.red{background:var(--red);color:#fff}.secondary{background:#eef5e9;color:var(--green);border:1px solid var(--line)}.ticket{margin-top:10px;border:1px solid var(--line);border-left:5px solid var(--green);border-radius:15px;padding:12px;background:#fff}.ticketNo{font-size:22px;font-weight:950;color:var(--red)}.ticketCode{margin-top:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);font-size:12px;word-break:break-all}.success{display:inline-flex;padding:7px 10px;border-radius:999px;background:#e5f5ed;color:#187650;font-size:11px;font-weight:950}.footer{text-align:center;color:var(--muted);font-size:11px;padding:18px 8px}.hidden{display:none!important}@media(max-width:600px){.steps,.grid{grid-template-columns:1fr}.head{align-items:flex-start}.demoTag{font-size:9px;padding:6px 8px}.head h1{font-size:21px}.kv{flex-direction:column}.kv b{text-align:left}.card{padding:14px}}
 </style>
 </head>
 <body>
@@ -16,47 +16,49 @@
 
   <section class="card">
     <h2>Simple Seller Workflow</h2>
-    <p class="note">This demo does not touch your real raffle records. Use it to show the seller process in three simple steps.</p>
-    <div class="steps"><div class="step active" id="s1">1. Open Request</div><div class="step" id="s2">2. Check Payment</div><div class="step" id="s3">3. Approve & Issue</div></div>
+    <p class="note">You will type the buyer and payment information yourself. Demo data is not saved to the real raffle database.</p>
+    <div class="steps"><div class="step active" id="s1">1. Enter Request</div><div class="step" id="s2">2. Check Payment</div><div class="step" id="s3">3. Approve & Issue</div></div>
   </section>
 
   <section class="card" id="requestCard">
     <h2>Buyer Request</h2>
-    <div class="kv"><span>Buyer</span><b>Maria Santos</b></div>
-    <div class="kv"><span>Tickets</span><b>3</b></div>
-    <div class="kv"><span>Total</span><b>₱300</b></div>
-    <div class="kv"><span>Payment</span><b>GCash</b></div>
-    <div class="kv"><span>Reference</span><b>1234567890</b></div>
-    <div class="kv"><span>Referred by</span><b>PD Warriors Member</b></div>
+    <div class="grid">
+      <label>Buyer name<input id="buyer" placeholder="Type buyer name"></label>
+      <label>Contact number<input id="contact" placeholder="09xx xxx xxxx"></label>
+      <label>Ticket quantity<input id="qty" type="number" min="1" max="20" value="1"></label>
+      <label>Payment method<select id="method"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Cash</option><option>Other</option></select></label>
+      <label>Payment reference<input id="ref" placeholder="Reference number"></label>
+      <label>Referred by<input id="referred" placeholder="Name of referrer"></label>
+    </div>
     <div class="actions"><button class="btn primary" id="reviewBtn" type="button">CHECK PAYMENT</button></div>
   </section>
 
   <section class="card hidden" id="paymentCard">
-    <h2>Payment Proof</h2>
-    <div class="proof"><strong>GCash Payment Proof</strong><div class="note">Demo payment screenshot • Amount ₱300 • Reference 1234567890</div></div>
+    <h2>Payment Check</h2>
+    <div class="proof"><strong id="proofTitle">Payment Details</strong><div class="note" id="proofText"></div></div>
+    <label style="margin-top:12px">Payment proof for demo<input id="proofFile" type="file" accept="image/*,.pdf"></label>
     <div class="actions"><button class="btn primary" id="approveBtn" type="button">APPROVE & ISSUE TICKETS</button><button class="btn secondary" id="backBtn" type="button">Back</button></div>
   </section>
 
   <section class="card hidden" id="issuedCard">
     <span class="success">APPROVED / ISSUED</span>
-    <h2 style="margin-top:10px">3 E‑Tickets Created</h2>
-    <div class="kv"><span>Control No.</span><b>GT27-CN-DEMO01</b></div>
-    <div class="ticket"><div class="ticketNo">GT27-20001</div><div class="ticketCode">Verification: DEMO-GT27-A1B2C3</div></div>
-    <div class="ticket"><div class="ticketNo">GT27-20002</div><div class="ticketCode">Verification: DEMO-GT27-D4E5F6</div></div>
-    <div class="ticket"><div class="ticketNo">GT27-20003</div><div class="ticketCode">Verification: DEMO-GT27-G7H8J9</div></div>
+    <h2 style="margin-top:10px" id="issuedTitle">E‑Tickets Created</h2>
+    <div class="kv"><span>Buyer</span><b id="outBuyer"></b></div>
+    <div class="kv"><span>Control No.</span><b id="controlNo">GT27-CN-DEMO01</b></div>
+    <div id="ticketList"></div>
     <div class="actions"><button class="btn red" id="restartBtn" type="button">RESTART DEMO</button><a class="btn secondary" href="./seller-login.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center">OPEN SELLER LOGIN</a></div>
   </section>
 
-  <div class="footer">Demo records are sample data only and are not saved to the real raffle database.</div>
+  <div class="footer">Demo only. Nothing entered here is saved to the real raffle records.</div>
 </div>
 <script>
-const requestCard=document.getElementById('requestCard'),paymentCard=document.getElementById('paymentCard'),issuedCard=document.getElementById('issuedCard');
-const s1=document.getElementById('s1'),s2=document.getElementById('s2'),s3=document.getElementById('s3');
-function step(n){[s1,s2,s3].forEach((x,i)=>x.classList.toggle('active',i===n-1))}
-document.getElementById('reviewBtn').onclick=()=>{requestCard.classList.add('hidden');paymentCard.classList.remove('hidden');issuedCard.classList.add('hidden');step(2);window.scrollTo({top:0,behavior:'smooth'})};
-document.getElementById('backBtn').onclick=()=>{requestCard.classList.remove('hidden');paymentCard.classList.add('hidden');step(1)};
-document.getElementById('approveBtn').onclick=()=>{paymentCard.classList.add('hidden');issuedCard.classList.remove('hidden');step(3);window.scrollTo({top:0,behavior:'smooth'})};
-document.getElementById('restartBtn').onclick=()=>{issuedCard.classList.add('hidden');paymentCard.classList.add('hidden');requestCard.classList.remove('hidden');step(1);window.scrollTo({top:0,behavior:'smooth'})};
+const $=id=>document.getElementById(id);const requestCard=$('requestCard'),paymentCard=$('paymentCard'),issuedCard=$('issuedCard');
+function step(n){['s1','s2','s3'].forEach((id,i)=>$(id).classList.toggle('active',i===n-1))}
+function esc(v){return String(v||'').replace(/[&<>"']/g,'')}
+$('reviewBtn').onclick=()=>{const buyer=$('buyer').value.trim();const qty=Math.max(1,Math.min(20,Number($('qty').value||1)));if(!buyer){alert('Type the buyer name first.');$('buyer').focus();return}$('qty').value=qty;$('proofTitle').textContent=$('method').value+' Payment';$('proofText').textContent='Buyer: '+buyer+' • '+qty+' ticket'+(qty===1?'':'s')+' • Total ₱'+(qty*100).toLocaleString('en-PH')+($('ref').value.trim()?' • Ref '+$('ref').value.trim():'');requestCard.classList.add('hidden');paymentCard.classList.remove('hidden');issuedCard.classList.add('hidden');step(2);window.scrollTo({top:0,behavior:'smooth'})};
+$('backBtn').onclick=()=>{requestCard.classList.remove('hidden');paymentCard.classList.add('hidden');step(1)};
+$('approveBtn').onclick=()=>{const buyer=esc($('buyer').value.trim());const qty=Math.max(1,Math.min(20,Number($('qty').value||1)));$('outBuyer').textContent=buyer;$('issuedTitle').textContent=qty+' E‑Ticket'+(qty===1?'':'s')+' Created';let html='';for(let i=0;i<qty;i++){const no='GT27-'+String(20001+i).padStart(5,'0');const code='DEMO-'+String(i+1).padStart(3,'0')+'-A7K9';html+=`<div class="ticket"><div class="ticketNo">${no}</div><div class="ticketCode">Verification: ${code}</div></div>`}$('ticketList').innerHTML=html;paymentCard.classList.add('hidden');issuedCard.classList.remove('hidden');step(3);window.scrollTo({top:0,behavior:'smooth'})};
+$('restartBtn').onclick=()=>location.reload();
 </script>
 </body>
 </html>
