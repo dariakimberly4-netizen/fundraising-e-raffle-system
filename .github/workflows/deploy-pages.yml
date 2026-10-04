@@ -65,17 +65,18 @@ jobs:
               x = seller_demo.read_text()
               for name in ['seller-demo-auth','seller-demo-number-choice','seller-demo-queue','seller-demo-ops','seller-demo-simple']:
                   x = re.sub(r'<script src="\.\/'+re.escape(name)+r'\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
-              x = x.replace('</body>', '<script src="./seller-demo-auth.js?v=1"></script><script src="./seller-demo-number-choice.js?v=1"></script><script src="./seller-demo-queue.js?v=1"></script><script src="./seller-demo-ops.js?v=1"></script><script src="./seller-demo-simple.js?v=1"></script></body>', 1)
+              x = x.replace('</body>', '<script src="./seller-demo-auth.js?v=2"></script><script src="./seller-demo-number-choice.js?v=1"></script><script src="./seller-demo-queue.js?v=1"></script><script src="./seller-demo-ops.js?v=1"></script><script src="./seller-demo-simple.js?v=1"></script></body>', 1)
               seller_demo.write_text(x)
 
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v47';", w, count=1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v48';", w, count=1)
               w = w.replace("'./buyer-demo-number-choice.js?v=1'", "'./buyer-demo-number-choice.js?v=2'")
               w = w.replace("'./buyer-demo-repeat-purchase.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=2'")
               w = w.replace("'./buyer-demo-simple.js?v=1'", "'./buyer-demo-simple.js?v=3'")
               w = w.replace("'./buyer-demo-simple.js?v=2'", "'./buyer-demo-simple.js?v=3'")
+              w = w.replace("'./seller-demo-auth.js?v=1'", "'./seller-demo-auth.js?v=2'")
               for asset, anchor in [
                   ("'./buyer-ticket-design.js?v=1'", "'./buyer-offline-workflow.js?v=1',"),
                   ("'./buyer-simple-flow.js?v=1'", "'./buyer-ticket-design.js?v=1',"),
@@ -86,8 +87,8 @@ jobs:
                   ("'./buyer-demo-operations.js?v=1'", "'./buyer-demo-repeat-purchase.js?v=2',"),
                   ("'./buyer-demo-sample.js?v=1'", "'./buyer-demo-operations.js?v=1',"),
                   ("'./buyer-demo-simple.js?v=3'", "'./buyer-demo-sample.js?v=1',"),
-                  ("'./seller-demo-auth.js?v=1'", "'./seller-simple-flow.js?v=1',"),
-                  ("'./seller-demo-number-choice.js?v=1'", "'./seller-demo-auth.js?v=1',"),
+                  ("'./seller-demo-auth.js?v=2'", "'./seller-simple-flow.js?v=1',"),
+                  ("'./seller-demo-number-choice.js?v=1'", "'./seller-demo-auth.js?v=2',"),
                   ("'./seller-demo-queue.js?v=1'", "'./seller-demo-number-choice.js?v=1',"),
                   ("'./seller-demo-ops.js?v=1'", "'./seller-demo-queue.js?v=1',"),
                   ("'./seller-demo-simple.js?v=1'", "'./seller-demo-ops.js?v=1',")
