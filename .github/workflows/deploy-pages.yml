@@ -52,16 +52,33 @@ jobs:
               x = x.replace('</body>', '<script src="./seller-simple-flow.js?v=1"></script></body>', 1)
               seller.write_text(x)
 
+          buyer_demo = Path('buyer-demo.html')
+          if buyer_demo.exists():
+              x = buyer_demo.read_text()
+              x = re.sub(r'<script src="\.\/buyer-demo-role-fix\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
+              x = x.replace('</body>', '<script src="./buyer-demo-role-fix.js?v=1"></script></body>', 1)
+              buyer_demo.write_text(x)
+
+          seller_demo = Path('seller-demo.html')
+          if seller_demo.exists():
+              x = seller_demo.read_text()
+              x = re.sub(r'<script src="\.\/seller-demo-role-fix\.js(?:\?v=\d+)?"></script>\s*', '', x, flags=re.S)
+              x = x.replace('</body>', '<script src="./seller-demo-role-fix.js?v=1"></script></body>', 1)
+              seller_demo.write_text(x)
+
           sw = Path('sw.js')
           if sw.exists():
               w = sw.read_text()
-              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v32';", w, count=1)
+              w = re.sub(r"const CACHE='fundraising-eraffle-v\d+';", "const CACHE='fundraising-eraffle-v33';", w, count=1)
               if "'./buyer-ticket-design.js?v=1'" not in w:
                   w = w.replace("'./buyer-offline-workflow.js?v=1',", "'./buyer-offline-workflow.js?v=1','./buyer-ticket-design.js?v=1',", 1)
               if "'./buyer-simple-flow.js?v=1'" not in w:
                   w = w.replace("'./buyer-ticket-design.js?v=1',", "'./buyer-ticket-design.js?v=1','./buyer-simple-flow.js?v=1',", 1)
               if "'./seller-simple-flow.js?v=1'" not in w:
                   w = w.replace("'./seller-offline-workflow.js?v=1',", "'./seller-offline-workflow.js?v=1','./seller-simple-flow.js?v=1',", 1)
+              for asset, anchor in [("'./buyer-demo-role-fix.js?v=1'", "'./buyer-simple-flow.js?v=1',"),("'./seller-demo-role-fix.js?v=1'", "'./seller-simple-flow.js?v=1',")]:
+                  if asset not in w:
+                      w = w.replace(anchor, anchor+asset+',', 1)
               if "url.pathname.endsWith('/buyer-ticket-design.js')" not in w:
                   w = w.replace("url.pathname.endsWith('/buyer-mobile-simple.js')||", "url.pathname.endsWith('/buyer-mobile-simple.js')||url.pathname.endsWith('/buyer-ticket-design.js')||", 1)
               if "url.pathname.endsWith('/buyer-simple-flow.js')" not in w:
